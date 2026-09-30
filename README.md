@@ -1,303 +1,296 @@
 # ComfyUI Mobile Studio
 
-A mobile-first web application for generative AI images that uses **ComfyUI as a local GPU inference backend**.
+**한국어** | [English](README.en.md)
 
-The browser never talks to ComfyUI. A small Node.js application layer exposes only the features the UI needs, injects validated parameters into a server-side workflow, follows execution over ComfyUI's WebSocket and streams progress back to the browser.
+**ComfyUI를 로컬 GPU 추론 백엔드로 사용하는** 모바일 우선 생성형 AI 이미지 웹 애플리케이션입니다.
 
-![Main UI](assets/screenshots/main-ui.png)
+브라우저는 ComfyUI와 직접 통신하지 않습니다. 가운데에 있는 Node.js 애플리케이션 계층이 화면에 필요한 기능만 API로 열고, 검증한 파라미터를 서버 쪽 워크플로우에 주입합니다. 실행 과정은 ComfyUI WebSocket으로 받아서 진행 상황을 브라우저로 실시간 전달합니다.
 
-## Overview
+![메인 화면](assets/screenshots/main-ui.png)
 
-ComfyUI is a powerful node-based engine for Stable Diffusion, but its graph editor is built for power users on a desktop screen. I wanted to generate images from my phone — on the couch or outside — while the actual inference runs on my own GPU at home.
+## 개요 (Overview)
 
-This project started as a personal mobile client for ComfyUI. This repository is its **portfolio edition**: the core generation pipeline, rebuilt around a proper security boundary so it can be shown publicly on a custom domain:
+ComfyUI는 Stable Diffusion을 다루는 강력한 노드 기반 엔진이지만, 그래프 편집기는 데스크톱 화면의 숙련자에게 맞춰져 있습니다. 저는 실제 추론은 집에 있는 제 GPU에서 돌리고, 휴대폰으로 소파에서든 밖에서든 쉽게 이미지를 만들고 싶었습니다.
 
-- a clean, touch-friendly UI (prompt, style presets, model/LoRA selection, sampling settings, pose reference, gallery)
-- an **application/API layer** between the public internet and ComfyUI
-- remote access through **Cloudflare Tunnel** — no router port forwarding, HTTPS by default, ComfyUI never exposed
+이 프로젝트는 개인용 모바일 ComfyUI 클라이언트로 시작했습니다. 이 저장소는 그 **포트폴리오 공개용 버전**으로, 핵심 생성 파이프라인을 제대로 된 보안 경계 위에 다시 구성해 커스텀 도메인으로 공개할 수 있게 만들었습니다.
 
-## Architecture
+- 터치하기 편한 깔끔한 UI (프롬프트, 스타일 프리셋, 모델·LoRA 선택, 샘플링 설정, 포즈 참조, 갤러리)
+- 인터넷과 ComfyUI 사이에 둔 **애플리케이션/API 계층**
+- **Cloudflare Tunnel** 기반 원격 접속 — 공유기 포트포워딩 없이 기본으로 HTTPS, ComfyUI는 외부에 노출하지 않음
+
+## 아키텍처 (Architecture)
 
 ```mermaid
 flowchart LR
-    U["User browser<br/>(phone / desktop)"] -->|HTTPS| CF["Custom domain<br/>Cloudflare edge"]
-    CF -->|"Cloudflare Tunnel<br/>(outbound-only connection)"| APP
+    U["사용자 브라우저<br/>(휴대폰 / PC)"] -->|HTTPS| CF["커스텀 도메인<br/>Cloudflare 엣지"]
+    CF -->|"Cloudflare Tunnel<br/>(PC에서 바깥으로만 연결)"| APP
 
-    subgraph HOST["Home GPU machine"]
-        APP["Web application<br/>static UI + API layer<br/>(Node.js, 127.0.0.1:8080)"]
+    subgraph HOST["집의 GPU PC"]
+        APP["웹 애플리케이션<br/>정적 UI + API 계층<br/>(Node.js, 127.0.0.1:8080)"]
         APP -->|"HTTP: /prompt, /history, /view, /upload"| COMFY["ComfyUI<br/>(127.0.0.1:8188)"]
-        COMFY -.->|"WebSocket: progress, executed,<br/>preview frames"| APP
-        COMFY --> GPU["Local GPU<br/>(SDXL inference)"]
-        GPU --> IMG[("Generated images<br/>ComfyUI output/")]
+        COMFY -.->|"WebSocket: 진행률, 실행 결과,<br/>미리보기 프레임"| APP
+        COMFY --> GPU["로컬 GPU<br/>(SDXL 추론)"]
+        GPU --> IMG[("생성 이미지<br/>ComfyUI output/")]
     end
 
-    APP -->|"SSE: job status, progress,<br/>live preview"| U
-    IMG -->|"streamed via /api/images/:job/:n"| APP
+    APP -->|"SSE: 작업 상태, 진행률,<br/>실시간 미리보기"| U
+    IMG -->|"/api/images/:job/:n 로 전달"| APP
 ```
 
-Request flow for one image:
+이미지 한 장이 만들어지는 흐름:
 
 ```mermaid
 sequenceDiagram
-    participant B as Browser
-    participant A as App / API layer
+    participant B as 브라우저
+    participant A as 앱 / API 계층
     participant C as ComfyUI
-    B->>A: POST /api/generate {prompt, model, size, seed, …}
-    A->>A: auth · rate limit · schema validation · allowlists
-    A->>A: build workflow from server-side template (role-based node injection)
-    A->>C: POST /prompt (client_id = server's WebSocket id)
+    B->>A: POST /api/generate {프롬프트, 모델, 크기, 시드, …}
+    A->>A: 로그인 확인 · 요청 횟수 제한 · 형식 검사 · 허용 목록 확인
+    A->>A: 서버 템플릿으로 워크플로우 조립 (역할 기반 노드 주입)
+    A->>C: POST /prompt (client_id = 서버의 WebSocket ID)
     A-->>B: 202 {jobId}
     B->>A: GET /api/jobs/:id/events (Server-Sent Events)
-    C-->>A: WS execution_start / progress / preview / executed
-    A-->>B: SSE job + preview events
-    C-->>A: WS execution_success (or /history safety-net poll)
-    A-->>B: SSE completed + image URLs
+    C-->>A: WS execution_start / progress / 미리보기 / executed
+    A-->>B: SSE 작업 상태 + 미리보기 이벤트
+    C-->>A: WS execution_success (또는 /history 안전망 확인)
+    A-->>B: SSE 완료 + 이미지 주소
     B->>A: GET /api/images/:jobId/0
-    A->>C: GET /view (only files that belong to that job)
+    A->>C: GET /view (그 작업에 속한 파일만)
 ```
 
-More detail: [docs/architecture.md](docs/architecture.md).
+더 자세한 설명: [docs/architecture.md](docs/architecture.md)
 
-## Features
+## 기능 (Features)
 
-Everything listed here is implemented in this repository.
+아래 기능은 모두 이 저장소에 실제로 구현되어 있습니다.
 
-**Interface**
-- Korean by default, switchable to English in one tap (UI texts, presets, progress stages and server error messages all follow the selected language)
+**화면**
+- 기본은 한국어, 버튼 하나로 English 전환 (화면 문구, 프리셋, 진행 단계, 서버 오류 메시지가 모두 선택한 언어를 따름)
 
-**Generation**
-- Prompt and negative prompt, with a *prompt helper* (clickable keyword chips by category)
-- Style presets: portrait, landscape, illustration, cinematic, product, anime-style, concept art — optionally applying recommended steps / CFG / size
-- Checkpoint selection and up to N LoRAs with per-LoRA strength (lists come from ComfyUI, filtered by an allowlist)
-- Image size presets (SDXL aspect ratios), batch size, seed (random / fixed / reuse last), steps, CFG
-- *Advanced Settings*: sampler & scheduler (lists read from ComfyUI), optional hires-fix second pass
-- Optional pose / reference image via ControlNet: upload an image, or **draw a pose** in the built-in OpenPose skeleton editor; optional pose extraction from photos
+**생성**
+- 프롬프트와 네거티브 프롬프트, 누르면 추가되는 *프롬프트 도우미*(분류별 키워드 칩)
+- 스타일 프리셋: 인물, 풍경, 일러스트, 시네마틱, 제품, 애니메이션, 컨셉 아트 — 추천 스텝·CFG·크기도 함께 적용 가능
+- 체크포인트 선택, LoRA 여러 개와 개별 강도 (목록은 ComfyUI에서 받아 허용 목록으로 거름)
+- 이미지 크기 프리셋(SDXL 화면비), 생성 개수, 시드(랜덤 / 고정 / 이전 시드 재사용), 스텝, CFG
+- *고급 설정*: 샘플러·스케줄러(ComfyUI에서 목록을 받음), 선택형 Hires fix 2차 생성
+- 선택 기능 — ControlNet 포즈·참조 이미지: 이미지 업로드, 또는 내장 OpenPose 뼈대 에디터로 **포즈 직접 그리기**, 사진에서 포즈 추출
 
-**Monitoring & results**
-- Server status pill: **Online / Offline / Generating**
-- Live progress: current stage (node title), step counter, elapsed time, queue position
-- Live preview frames relayed from ComfyUI during sampling
-- Result view with download, details and parameter summary
-- Recent-results gallery (server-side, persists across restarts) with details dialog, download, *use these settings* and hide
+**진행 상황 · 결과**
+- 서버 상태 표시: **온라인 / 오프라인 / 생성 중**
+- 실시간 진행률: 현재 단계, 스텝 수, 경과 시간, 대기 순서
+- 샘플링 중 ComfyUI가 보내는 실시간 미리보기
+- 결과 화면: 다운로드, 상세 정보, 설정 요약
+- 최근 생성 결과 갤러리 (서버에 저장되어 재시작 후에도 유지): 상세 창, 다운로드, *이 설정으로 다시 만들기*, 숨기기
 
-**Reliability & security**
-- Access-token sign-in → HttpOnly, SameSite=Strict, HMAC-signed session cookie
-- One generation at a time with a short waiting line; rate limits for generation, uploads and sign-in
-- Fixed request schema: unknown fields (e.g. `workflow`) are rejected; models, samplers and sizes must be on the published catalog
-- Activity-based job timeout, `/history` polling as a safety net for missed WebSocket messages, cancel support
-- Clear handling of ComfyUI being offline, WebSocket reconnects (exponential backoff), SSE → polling fallback in the browser
-- Duplicate-click protection, error messages shown in the UI with *Try again*
+**안정성 · 보안**
+- 접속 비밀번호 로그인 → HttpOnly · SameSite=Strict · HMAC 서명 세션 쿠키
+- 한 번에 1건만 생성 + 짧은 대기열, 생성·업로드·로그인 요청 횟수 제한
+- 정해진 요청 형식: 모르는 항목(예: `workflow`)은 거절, 모델·샘플러·크기는 공개된 목록에 있어야 함
+- 활동 기반 시간 제한, WebSocket 메시지를 놓쳤을 때를 위한 `/history` 확인, 취소 기능
+- ComfyUI 꺼짐 처리, WebSocket 자동 재연결(간격을 늘려 가며), 브라우저의 SSE → 폴링 대체 경로
+- 중복 클릭 방지, 오류 메시지 화면 표시와 *다시 시도*
 
-## Tech Stack
+## 기술 스택 (Tech Stack)
 
-| Layer | Technology |
+| 영역 | 기술 |
 |---|---|
-| Frontend | HTML, CSS (design tokens, light/dark), vanilla JavaScript ES modules, `EventSource` (SSE), Canvas (pose editor) |
-| Application / API | Node.js 22 — `node:http`, built-in `fetch` / `WebSocket` / `FormData`; **no runtime npm dependencies** |
-| Inference backend | ComfyUI HTTP API + WebSocket, API-format workflow JSON |
-| Models | Stable Diffusion XL checkpoints (any model `CheckpointLoaderSimple` can load), LoRA, optional ControlNet (OpenPose) |
-| Remote access | Cloudflare Tunnel (`cloudflared`) + custom domain |
-| Testing | `node:test` — unit tests + end-to-end tests against a mock ComfyUI (HTTP + WebSocket) |
+| 프론트엔드 | HTML, CSS(디자인 토큰, 라이트/다크), 순수 JavaScript ES 모듈, `EventSource`(SSE), Canvas(포즈 에디터) |
+| 애플리케이션 / API | Node.js 22 — `node:http`, 내장 `fetch` / `WebSocket` / `FormData`, **실행용 npm 의존성 없음** |
+| 추론 백엔드 | ComfyUI HTTP API + WebSocket, API 형식 워크플로우 JSON |
+| 모델 | Stable Diffusion XL 체크포인트(`CheckpointLoaderSimple`로 불러올 수 있는 모델), LoRA, 선택형 ControlNet(OpenPose) |
+| 원격 접속 | Cloudflare Tunnel(`cloudflared`) + 커스텀 도메인 |
+| 테스트 | `node:test` — 단위 테스트 + 가짜 ComfyUI(HTTP + WebSocket)를 상대로 한 통합 테스트 |
 
-## Screenshots
+## 스크린샷 (Screenshots)
 
-| Main UI | Generation progress |
+| 메인 화면 | 생성 진행 |
 |---|---|
-| ![Main UI](assets/screenshots/main-ui.png) | ![Generation progress](assets/screenshots/generation-progress.png) |
+| ![메인 화면](assets/screenshots/main-ui.png) | ![생성 진행](assets/screenshots/generation-progress.png) |
 
-| Generated result | Mobile UI |
+| 생성 결과 | 모바일 화면 |
 |---|---|
-| ![Generated result](assets/screenshots/generated-result.png) | ![Mobile UI](assets/screenshots/mobile-ui.png) |
+| ![생성 결과](assets/screenshots/generated-result.png) | ![모바일 화면](assets/screenshots/mobile-ui.png) |
 
-## Installation
+## 설치 (Installation)
 
-Requirements: **Node.js 22+**, a working **ComfyUI** install with an NVIDIA GPU (or any backend ComfyUI supports), and at least one SDXL checkpoint.
+필요한 것: **Node.js 22 이상**, NVIDIA GPU에서 동작하는 **ComfyUI**(또는 ComfyUI가 지원하는 다른 환경), SDXL 체크포인트 1개 이상.
 
-### Windows — one click
+### Windows — 더블클릭으로 실행
 
-| File | What it does |
+| 파일 | 하는 일 |
 |---|---|
-| `start-demo.bat` | Starts ComfyUI (if `COMFYUI_DIR` is set and it isn't running yet, bound to localhost), waits until it answers, starts the web app and — when `CLOUDFLARE_TUNNEL_TOKEN` is set — the Cloudflare Tunnel, then opens the browser. |
-| `start.bat` | Starts only the web app in the current window (ComfyUI already running). |
-| `test.bat` | Runs the test suite and the workflow check. |
-| `models.bat` | Lists the checkpoints / LoRAs ComfyUI can see (ComfyUI must be running) and opens `config/models.json` so you can pick which ones the demo shows. |
+| `start-demo.bat` | ComfyUI를 켜고(`COMFYUI_DIR`이 설정돼 있고 꺼져 있을 때, 이 PC 안에서만 접속되게) 응답할 때까지 기다린 뒤, 웹앱을 켜고, `CLOUDFLARE_TUNNEL_TOKEN`이 있으면 Cloudflare Tunnel까지 켜고 브라우저를 엽니다. |
+| `start.bat` | ComfyUI가 이미 켜져 있을 때 웹앱만 현재 창에서 실행합니다. |
+| `test.bat` | 테스트와 워크플로우 점검을 실행합니다. |
+| `models.bat` | ComfyUI가 인식한 체크포인트·LoRA 목록을 보여 주고(ComfyUI가 켜져 있어야 함), 데모에 보여 줄 모델을 고르도록 `config/models.json`을 엽니다. |
 
-On the first run the launcher creates `.env` with a random `ACCESS_TOKEN` / `SESSION_SECRET` (the token is printed once) and `config/models.json`, then opens `.env` in Notepad. Set `COMFYUI_DIR` to your ComfyUI portable folder, list your models in `config/models.json`, and run `start-demo.bat` again.
+처음 실행하면 `.env`(랜덤 `ACCESS_TOKEN` · `SESSION_SECRET`, 비밀번호는 한 번 화면에 표시)와 `config/models.json`이 자동으로 만들어지고, 메모장으로 `.env`가 열립니다. `COMFYUI_DIR`에 ComfyUI 포터블 폴더를 적고(비워 두면 드라이브에서 찾아봅니다), `config/models.json`에 모델을 적은 뒤 `start-demo.bat`을 다시 실행하세요.
 
-### Any OS — manually
+### 다른 OS — 직접 실행
 
 ```bash
-# 1. Get the code
-git clone <repository-url> comfyui-mobile-studio
+# 1. 코드 받기
+git clone https://github.com/Bong0524/comfyui-mobile-studio.git
 cd comfyui-mobile-studio
 
-# 2. Configure: creates .env (random ACCESS_TOKEN / SESSION_SECRET) and config/models.json
+# 2. 설정: .env(랜덤 ACCESS_TOKEN / SESSION_SECRET)와 config/models.json 생성
 npm run setup
-#    then list the models the demo may use in config/models.json and review .env
+#    그다음 config/models.json 에 데모용 모델을 적고 .env 를 확인
 
-# 3. Check that the workflow template is usable
+# 3. 워크플로우 템플릿 점검
 npm run workflow:check
 
-# 4. Start ComfyUI (see "ComfyUI Setup"), then the app
+# 4. ComfyUI 를 켠 뒤("ComfyUI 설정" 참고) 앱 실행
 npm start
-# → open http://127.0.0.1:8080 and sign in with ACCESS_TOKEN
+# → http://127.0.0.1:8080 에 접속해 ACCESS_TOKEN 으로 로그인
 ```
 
-There is nothing to `npm install` for running the app. `npm test` runs the test suite (also dependency-free).
+실행을 위해 `npm install`할 것은 없습니다. `npm test`로 테스트를 돌릴 수 있습니다(역시 의존성 없음).
 
-**No GPU at hand?** `npm run mock` starts a mock ComfyUI on port 8199 that returns procedural gradient images — useful for UI work and for the tests. Point `COMFYUI_URL=http://127.0.0.1:8199` at it.
+**GPU가 없을 때:** `npm run mock`을 실행하면 8199 포트에 가짜 ComfyUI가 뜨고 단순한 그라데이션 이미지를 돌려줍니다. 화면 작업이나 테스트용이며, `COMFYUI_URL=http://127.0.0.1:8199`로 연결하면 됩니다.
 
-## Configuration
+## 설정 (Configuration)
 
-All settings live in `.env` (git-ignored); `.env.example` documents every key. The important ones:
+모든 설정은 `.env`(git에 올라가지 않음)에 있고, 전체 항목은 `.env.example`에 설명되어 있습니다. 주요 항목:
 
-| Key | Purpose |
+| 항목 | 용도 |
 |---|---|
-| `APP_HOST`, `APP_PORT` | Where the web app listens. Keep `127.0.0.1` — the tunnel connects locally. |
-| `DOMAIN` / `PUBLIC_ORIGIN` | Public hostname. Used for the Origin (CSRF) check and `Secure` cookies. |
-| `TRUST_PROXY` | `true` behind Cloudflare Tunnel so rate limits use the real client IP (`CF-Connecting-IP`). |
-| `COMFYUI_URL`, `COMFYUI_WS_URL` | ComfyUI address (loopback). WS URL is derived when empty. |
-| `ACCESS_TOKEN` | **Required.** Sign-in password for visitors (≥ 8 chars). The server refuses to start without it. |
-| `SESSION_SECRET` | Signs session cookies. Set it so sessions survive restarts. |
-| `API_KEY` | Optional bearer key for scripted access. |
-| `MODEL_LIST_MODE`, `MODELS_CONFIG` | `allowlist` (default) publishes only models in `config/models.json` that ComfyUI actually has. |
-| `MAX_*`, `*_RATE_LIMIT_PER_MIN`, `MAX_PENDING_JOBS` | Demo limits (steps, pixels, batch, LoRAs, upload size, queue). |
-| `JOB_IDLE_TIMEOUT_SEC`, `JOB_MAX_DURATION_SEC` | Inactivity timeout and hard ceiling per job. |
-| `SAFETY_NEGATIVE`, `BLOCKED_TERMS_FILE` | A phrase always appended to the negative prompt; prompts containing a listed term are rejected (both optional; copy `config/blocked-terms.example.txt`, the real list stays out of Git). |
-| `CONTROLNET_MODEL`, `CONTROLNET_PREPROCESSOR` | Enable the pose/reference feature (see below). |
-| `CLOUDFLARE_TUNNEL_TOKEN` | Used only by `npm run tunnel` / `start-demo.bat`. |
-| `COMFYUI_DIR`, `COMFYUI_EXTRA_ARGS` | Used only by `start-demo.bat` to launch ComfyUI portable (never with `--listen`). |
+| `APP_HOST`, `APP_PORT` | 웹앱이 열리는 주소. `127.0.0.1` 그대로 두세요 — 터널은 이 PC 안에서 연결합니다. |
+| `DOMAIN` / `PUBLIC_ORIGIN` | 공개 도메인. Origin(CSRF) 확인과 `Secure` 쿠키에 쓰입니다. |
+| `TRUST_PROXY` | Cloudflare Tunnel 뒤에서는 `true` — 요청 횟수 제한에 실제 접속자 IP(`CF-Connecting-IP`)를 씁니다. |
+| `COMFYUI_URL`, `COMFYUI_WS_URL` | ComfyUI 주소(이 PC 안). WS 주소는 비워 두면 자동으로 만듭니다. |
+| `ACCESS_TOKEN` | **필수.** 방문자가 입력할 로그인 비밀번호(8자 이상). 없으면 서버가 시작하지 않습니다. |
+| `SESSION_SECRET` | 세션 쿠키 서명 키. 설정해 두면 재시작해도 로그인이 유지됩니다. |
+| `API_KEY` | 선택: 스크립트 호출용 Bearer 키. |
+| `MODEL_LIST_MODE`, `MODELS_CONFIG` | `allowlist`(기본)는 `config/models.json`에 있으면서 ComfyUI에 실제로 설치된 모델만 공개합니다. |
+| `MAX_*`, `*_RATE_LIMIT_PER_MIN`, `MAX_PENDING_JOBS` | 데모 제한값(스텝, 픽셀, 생성 개수, LoRA, 업로드 크기, 대기열). |
+| `JOB_IDLE_TIMEOUT_SEC`, `JOB_MAX_DURATION_SEC` | 무응답 시간 제한과 작업당 최대 시간. |
+| `SAFETY_NEGATIVE`, `BLOCKED_TERMS_FILE` | 모든 네거티브 프롬프트 뒤에 항상 붙일 문구, 목록의 단어가 든 프롬프트는 거절(둘 다 선택, 목록은 `config/blocked-terms.example.txt`를 복사해 작성하며 Git에 올라가지 않음). |
+| `CONTROLNET_MODEL`, `CONTROLNET_PREPROCESSOR` | 포즈·참조 이미지 기능 켜기(아래 참고). |
+| `CLOUDFLARE_TUNNEL_TOKEN` | `npm run tunnel` / `start-demo.bat`에서만 사용. |
+| `COMFYUI_DIR`, `COMFYUI_EXTRA_ARGS` | `start-demo.bat`이 ComfyUI 포터블을 켤 때만 사용(`--listen`은 절대 넣지 않음). |
 
-`config/` also holds the style presets (`style-presets.json`), prompt-helper keywords (`prompt-tags.json`) and an example blocked-terms list (`blocked-terms.example.txt`) — all editable without touching code.
+`config/` 폴더에는 스타일 프리셋(`style-presets.json`), 프롬프트 도우미 키워드(`prompt-tags.json`), 금지어 목록 예시(`blocked-terms.example.txt`)가 있고, 모두 코드를 고치지 않고 수정할 수 있습니다. 프리셋·키워드의 표시 이름은 한국어/영어를 함께 적습니다.
 
-## ComfyUI Setup
+## ComfyUI 설정 (ComfyUI Setup)
 
-1. Install ComfyUI and start it **bound to localhost** (the default — do not add `--listen`). Live previews need a preview method:
+1. ComfyUI를 설치하고 **이 PC 안에서만 접속되게** 실행합니다(기본값 — `--listen`을 넣지 마세요). 실시간 미리보기에는 preview 옵션이 필요합니다.
 
    ```bash
-   python main.py --preview-method auto          # Windows portable: add to run_nvidia_gpu.bat
+   python main.py --preview-method auto          # Windows 포터블: run_nvidia_gpu.bat 에 추가, 또는 start-demo.bat 사용
    ```
-   No `--enable-cors-header` is needed: the browser never calls ComfyUI directly.
+   브라우저가 ComfyUI를 직접 부르지 않으므로 `--enable-cors-header`는 필요 없습니다.
 
-2. **Models live in ComfyUI, not in this repository.** Put SDXL checkpoints into `ComfyUI/models/checkpoints/` and LoRAs into `ComfyUI/models/loras/` (or the folders your `extra_model_paths.yaml` points to). Then run `models.bat` / `npm run models` to see the exact names ComfyUI reports and copy the ones the demo may use into `config/models.json` (sub-folders included, e.g. `"SDXL\\model.safetensors"` on Windows).
+2. **모델 파일은 이 저장소가 아니라 ComfyUI에 둡니다.** SDXL 체크포인트는 `ComfyUI/models/checkpoints/`, LoRA는 `ComfyUI/models/loras/`에 넣습니다(또는 `extra_model_paths.yaml`로 연결한 폴더). 그다음 `models.bat` / `npm run models`로 ComfyUI가 인식한 정확한 이름을 확인하고, 데모에서 쓸 모델만 `config/models.json`에 복사합니다(하위 폴더 포함, Windows에서는 `"SDXL\\model.safetensors"`처럼 `\`를 두 번).
 
-3. **Workflow** — `workflows/txt2img.api.json` uses **core nodes only**, so no custom nodes are required:
+3. **워크플로우** — `workflows/txt2img.api.json`은 **ComfyUI 기본 노드만** 사용하므로 커스텀 노드가 필요 없습니다.
 
    `CheckpointLoaderSimple → CLIPTextEncode (+/−) → EmptyLatentImage → KSampler → LatentUpscaleBy → KSampler (hires) → VAEDecode → SaveImage`
 
-   LoRA (`LoraLoader`) and ControlNet (`ControlNetLoader`, `ControlNetApplyAdvanced`, `LoadImage`) nodes are inserted by the server only when requested. The hires branch is pruned when disabled.
+   LoRA(`LoraLoader`)와 ControlNet(`ControlNetLoader`, `ControlNetApplyAdvanced`, `LoadImage`) 노드는 요청할 때만 서버가 끼워 넣습니다. Hires가 꺼져 있으면 그 가지는 잘라 냅니다.
 
-   You can replace the template with your own export (*Workflow → Export (API)*). Nodes are located **by role in the graph, not by id**; run `npm run workflow:check path/to/file.json` to see what was detected.
+   직접 만든 워크플로우(*Workflow → Export (API)*)로 바꿀 수도 있습니다. 노드는 **번호가 아니라 그래프상의 역할로** 찾으며, `npm run workflow:check 파일.json`으로 어떤 노드가 잡혔는지 확인할 수 있습니다.
 
-4. **Optional — pose / reference image**
-   - Download an SDXL OpenPose ControlNet into `models/controlnet/` and set `CONTROLNET_MODEL` to its file name.
-   - For *extract the pose from a photo*, install the custom node pack **comfyui_controlnet_aux** (provides `OpenposePreprocessor`) and set `CONTROLNET_PREPROCESSOR=openpose`.
-   - The drawn-pose editor needs no custom nodes (the skeleton image is used directly).
+4. **선택 — 포즈·참조 이미지**
+   - SDXL용 OpenPose ControlNet을 `models/controlnet/`에 넣고 `CONTROLNET_MODEL`에 파일 이름을 적습니다.
+   - *사진에서 포즈 추출*을 쓰려면 커스텀 노드 **comfyui_controlnet_aux**(`OpenposePreprocessor` 제공)를 설치하고 `CONTROLNET_PREPROCESSOR=openpose`로 설정합니다.
+   - 포즈 그리기 에디터는 커스텀 노드가 필요 없습니다(뼈대 이미지를 그대로 사용).
 
-## Remote Demo
+## 원격 데모 (Remote Demo)
 
-Goal: `https://<your-demo-domain>` → Cloudflare Tunnel → `http://127.0.0.1:8080` (this app). ComfyUI stays on `127.0.0.1:8188` and is **not** published.
+목표: `https://<데모 도메인>` → Cloudflare Tunnel → `http://127.0.0.1:8080`(이 앱). ComfyUI는 `127.0.0.1:8188`에 그대로 두고 **공개하지 않습니다.**
 
-1. Add your domain to Cloudflare (free plan is enough).
-2. Install `cloudflared` on the GPU machine.
-3. In **Cloudflare Zero Trust → Networks → Tunnels**, create a tunnel (type *Cloudflared*). Copy the token shown in the install step into `.env` as `CLOUDFLARE_TUNNEL_TOKEN`.
-4. Under **Public Hostname**, add `demo.<your-domain>` → service `HTTP` → `127.0.0.1:8080`. Do not add a route for port 8188.
-5. In `.env` set `DOMAIN=demo.<your-domain>` and `TRUST_PROXY=true`, then:
+1. 도메인을 Cloudflare에 추가합니다(무료 요금제로 충분).
+2. GPU PC에 `cloudflared`를 설치합니다.
+3. **Cloudflare Zero Trust → Networks → Tunnels**에서 터널(유형 *Cloudflared*)을 만들고, 설치 단계에 나오는 토큰을 `.env`의 `CLOUDFLARE_TUNNEL_TOKEN`에 넣습니다.
+4. **Public Hostname**에 `demo.<내 도메인>` → 서비스 `HTTP` → `127.0.0.1:8080`을 추가합니다. 8188 포트로 가는 경로는 추가하지 마세요.
+5. `.env`에 `DOMAIN=demo.<내 도메인>`, `TRUST_PROXY=true`를 설정한 뒤 실행합니다.
 
    ```bash
-   npm start          # terminal 1 — the app
-   npm run tunnel     # terminal 2 — cloudflared (token passed via env, not argv)
+   npm start          # 터미널 1 — 앱
+   npm run tunnel     # 터미널 2 — cloudflared (토큰은 명령줄이 아닌 환경변수로 전달)
    ```
+   Windows에서는 `start-demo.bat` 하나로 둘 다 켜집니다.
 
-The tunnel is an outbound connection from your machine, so **no port forwarding** is needed and TLS is handled by Cloudflare. A locally-managed alternative (config file + credentials JSON) is in [deploy/cloudflared/config.example.yml](deploy/cloudflared/config.example.yml).
+터널은 이 PC에서 바깥으로 나가는 연결이라 **포트포워딩이 필요 없고**, TLS(HTTPS)는 Cloudflare가 처리합니다. 설정 파일 방식의 대안은 [deploy/cloudflared/config.example.yml](deploy/cloudflared/config.example.yml)에 있습니다.
 
-Optional hardening: put a **Cloudflare Access** policy (e.g. one-time PIN to specific emails) in front of the hostname for a second layer of authentication.
+추가 보호가 필요하면 호스트 앞에 **Cloudflare Access** 정책(예: 지정한 이메일로 일회용 PIN 인증)을 두어 로그인을 한 겹 더 둘 수 있습니다.
 
-## Security
+## 보안 (Security)
 
-The design principle is a **security boundary between the public app and ComfyUI**:
+설계 원칙은 **공개 앱과 ComfyUI 사이의 보안 경계**입니다.
 
-- **ComfyUI is never exposed.** It listens on loopback only and has no tunnel route. Its API can run arbitrary workflows, read/write files in its folders and load any model — so it must not be reachable from the internet.
-- **No proxying of the ComfyUI API.** The app offers a small purpose-built API (`/api/generate`, `/api/jobs/…`, `/api/images/…`, `/api/uploads`). There is no generic pass-through.
-- **No client-supplied workflows.** Requests follow a fixed schema; unknown keys are rejected. The graph comes from the server-side template, and values are injected only into the nodes the server resolved.
-- **Allowlists for everything that becomes a file name**: checkpoints, LoRAs, samplers, schedulers, sizes, presets. Output paths are generated by the server; images are served by `jobId/index`, never by file name. Uploads are type-checked by magic bytes and renamed randomly.
-- **Authentication**: access token → HMAC-signed HttpOnly `SameSite=Strict` cookie; constant-time comparisons; sign-in rate limit. The server refuses to start without `ACCESS_TOKEN` (unless explicitly in loopback-only dev mode).
-- **CSRF**: state-changing requests must carry the app's own `Origin`.
-- **Resource protection**: one GPU job at a time + bounded queue, per-IP rate limits, step/pixel/batch/LoRA/upload caps, job timeouts.
-- **Content settings**: a negative phrase the server always appends and a blocked-terms list, both set by the operator on the host and kept out of Git.
-- **Headers**: strict CSP (`default-src 'self'`, no inline scripts), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: no-referrer`.
-- **Secrets** live only in `.env` (git-ignored); the tunnel token is passed to `cloudflared` through its environment, not the command line.
+- **ComfyUI는 절대 노출하지 않습니다.** 이 PC 안(127.0.0.1)에서만 접속되고 터널 경로도 없습니다. ComfyUI API는 임의의 워크플로우 실행, 폴더 파일 읽기·쓰기, 모든 모델 로딩이 가능하므로 인터넷에서 닿으면 안 됩니다.
+- **ComfyUI API를 그대로 중계하지 않습니다.** 앱은 필요한 기능만 담은 작은 API(`/api/generate`, `/api/jobs/…`, `/api/images/…`, `/api/uploads`)만 엽니다. 아무 경로나 넘겨주는 통로는 없습니다.
+- **사용자가 워크플로우를 보낼 수 없습니다.** 요청은 정해진 형식이며 모르는 항목은 거절합니다. 그래프는 서버 템플릿에서 만들고, 값은 서버가 찾은 노드에만 들어갑니다.
+- **파일 이름이 되는 모든 값은 허용 목록으로 제한합니다.** 체크포인트, LoRA, 샘플러, 스케줄러, 크기, 프리셋이 해당됩니다. 저장 경로는 서버가 정하고, 이미지는 파일 이름이 아니라 `작업ID/번호`로만 제공합니다. 업로드는 파일 앞부분(매직 바이트)으로 형식을 확인하고 무작위 이름으로 바꿉니다.
+- **로그인**: 접속 비밀번호 → HMAC 서명 HttpOnly `SameSite=Strict` 쿠키, 시간이 일정한 비교, 로그인 횟수 제한. `ACCESS_TOKEN`이 없으면 서버가 시작하지 않습니다(이 PC 전용 개발 모드를 명시한 경우만 예외).
+- **CSRF**: 변경 요청은 반드시 이 앱 자신의 `Origin`에서 와야 합니다.
+- **자원 보호**: GPU 작업은 한 번에 1건 + 제한된 대기열, IP별 요청 횟수 제한, 스텝·픽셀·생성 개수·LoRA·업로드 크기 상한, 작업 시간 제한.
+- **콘텐츠 설정**: 서버가 항상 붙이는 네거티브 문구와 금지어 목록을 운영자가 이 PC에서만 지정합니다(Git에 올라가지 않음).
+- **헤더**: 엄격한 CSP(`default-src 'self'`, 인라인 스크립트 없음), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: no-referrer`.
+- **비밀값**은 `.env`(git 제외)에만 두고, 터널 토큰은 명령줄이 아닌 환경변수로 `cloudflared`에 넘깁니다.
 
-## Project Structure
+## 프로젝트 구조 (Project Structure)
 
 ```
 comfyui-mobile-studio/
-├─ server/                    Application / API layer (Node.js, no dependencies)
-│  ├─ index.js                entry point (reads .env, starts the app)
-│  ├─ app.js                  routes, SSE, image proxy, static files
-│  ├─ config.js               env parsing + validation (refuses unsafe configs)
-│  ├─ security.js             sign-in, signed sessions, rate limits, Origin check
-│  ├─ catalog.js              models/LoRAs/samplers (ComfyUI ∩ allowlist), presets
-│  ├─ job-manager.js          single-GPU queue, WebSocket event handling, timeouts
-│  ├─ history-store.js        recent-results gallery (data/history.json)
-│  ├─ uploads.js              reference-image uploads (magic-byte check, random names)
-│  ├─ static.js               static file serving for public/
-│  ├─ comfy/client.js         ComfyUI HTTP client
-│  ├─ comfy/monitor.js        persistent ComfyUI WebSocket (auto-reconnect)
+├─ server/                    애플리케이션 / API 계층 (Node.js, 의존성 없음)
+│  ├─ index.js                시작 파일 (.env 를 읽고 앱 실행)
+│  ├─ app.js                  라우트, SSE, 이미지 중계, 정적 파일
+│  ├─ config.js               환경변수 읽기 + 검사 (위험한 설정이면 시작 거부)
+│  ├─ security.js             로그인, 서명 세션, 요청 횟수 제한, Origin 확인
+│  ├─ catalog.js              모델·LoRA·샘플러 (ComfyUI ∩ 허용 목록), 프리셋
+│  ├─ job-manager.js          GPU 1건씩 처리하는 대기열, WebSocket 이벤트 처리, 시간 제한
+│  ├─ history-store.js        최근 결과 갤러리 (data/history.json)
+│  ├─ uploads.js              참조 이미지 업로드 (매직 바이트 확인, 무작위 이름)
+│  ├─ static.js               public/ 정적 파일 제공
+│  ├─ comfy/client.js         ComfyUI HTTP 클라이언트
+│  ├─ comfy/monitor.js        ComfyUI WebSocket 상시 연결 (자동 재연결)
 │  └─ workflow/
-│     ├─ resolve-nodes.js     find nodes by role in the graph
-│     ├─ build-workflow.js    parameter injection, LoRA chain, ControlNet, hires pruning
-│     └─ validate.js          request schema + limits + allowlists
-├─ public/                    Web UI (HTML/CSS/ES modules)
+│     ├─ resolve-nodes.js     그래프에서 역할로 노드 찾기
+│     ├─ build-workflow.js    파라미터 주입, LoRA 연결, ControlNet, Hires 가지치기
+│     └─ validate.js          요청 형식 + 제한값 + 허용 목록 검사
+├─ public/                    웹 UI (HTML/CSS/ES 모듈)
 │  ├─ index.html
 │  ├─ css/tokens.css, app.css
-│  └─ js/ main · api · i18n (ko/en) · status · form · generate · gallery · reference · pose-editor · ui
-├─ workflows/txt2img.api.json ComfyUI workflow template (core nodes only)
-├─ config/                    style presets, prompt tags, model allowlist example, blocked-terms example
-├─ start-demo.bat            Windows: ComfyUI + app + tunnel + browser in one click
-├─ start.bat · test.bat       Windows: app only / run tests
-├─ models.bat                 Windows: list ComfyUI models, edit the allowlist
-├─ scripts/                   mock ComfyUI, tunnel launcher, workflow checker, first-run setup,
-│                             helpers for the .bat launchers (env-get, wait-for, check-setup, say = Korean messages)
-├─ test/                      unit + end-to-end tests (node:test)
-├─ deploy/cloudflared/        locally-managed tunnel config example (no credentials)
-├─ docs/architecture.md       detailed architecture and data flow
-└─ assets/screenshots/        README images
+│  └─ js/ main · api · i18n(한/영) · status · form · generate · gallery · reference · pose-editor · ui
+├─ workflows/txt2img.api.json ComfyUI 워크플로우 템플릿 (기본 노드만)
+├─ config/                    스타일 프리셋, 프롬프트 키워드, 모델 허용 목록 예시, 금지어 목록 예시
+├─ start-demo.bat             Windows: ComfyUI + 앱 + 터널 + 브라우저를 한 번에
+├─ start.bat · test.bat       Windows: 앱만 실행 / 테스트
+├─ models.bat                 Windows: ComfyUI 모델 목록 확인, 허용 목록 편집
+├─ scripts/                   가짜 ComfyUI, 터널 실행, 워크플로우 점검, 첫 실행 설정,
+│                             .bat 도우미 (env-get, wait-for, check-setup, say = 한글 안내 문구)
+├─ test/                      단위 + 통합 테스트 (node:test)
+├─ deploy/cloudflared/        설정 파일 방식 터널 예시 (인증 정보 없음)
+├─ docs/architecture*.md      상세 구조와 데이터 흐름 (한국어 / 영어)
+└─ assets/screenshots/        README 이미지
 ```
 
-## Testing
+## 테스트 (Testing)
 
 ```bash
-npm test
+npm test          # Windows: test.bat
 ```
 
-27 tests: workflow role detection (including a renumbered graph), parameter injection, LoRA rewiring, ControlNet insertion, request validation, session signing, config safety, and end-to-end runs against the mock ComfyUI (sign-in, SSE progress, live preview, image proxy, gallery, uploads, cancel, queue limit, backend error, backend offline).
+테스트 27개: 워크플로우 역할 탐지(노드 번호를 바꾼 그래프 포함), 파라미터 주입, LoRA 재연결, ControlNet 삽입, 요청 검사, 세션 서명, 설정 안전장치, 그리고 가짜 ComfyUI를 상대로 한 통합 테스트(로그인, SSE 진행률, 실시간 미리보기, 이미지 중계, 갤러리, 업로드, 취소, 대기열 제한, 백엔드 오류, 백엔드 꺼짐).
 
-## Future Improvements
+## 앞으로 개선할 점 (Future Improvements)
 
-- Persistent job queue (survives restarts) and multi-user fairness
-- Multiple GPUs / multiple ComfyUI workers behind the job manager
-- Real user accounts (OAuth or Cloudflare Access identity) instead of a shared token
-- Per-user galleries and storage quotas
-- Image-to-image and inpainting workflows (the original personal version has them)
-- Cloud GPU deployment option (container + managed GPU instance)
-- Automated screenshot/visual regression tests in CI
+- 재시작해도 유지되는 작업 대기열, 여러 사용자 간 공정한 순서
+- 여러 GPU / 여러 ComfyUI 작업자를 job manager 뒤에 두기
+- 공유 비밀번호 대신 실제 사용자 계정 (OAuth 또는 Cloudflare Access 신원 정보)
+- 사용자별 갤러리와 저장 용량 제한
+- 이미지→이미지, 인페인팅 워크플로우 (원래 개인용 버전에는 있는 기능)
+- 클라우드 GPU 배포 옵션 (컨테이너 + 관리형 GPU 인스턴스)
+- CI에서 화면 스크린샷 비교 자동 테스트
 
-## License
+## 라이선스 (License)
 
-The source code in this repository is released under the **MIT License** — see [LICENSE](LICENSE).
+이 저장소의 소스 코드는 **MIT 라이선스**입니다 — [LICENSE](LICENSE) 참고.
 
-Notes on third-party components:
-- **ComfyUI** is licensed under **GPL-3.0**. This project does not include, modify or link ComfyUI code; it talks to a separately installed ComfyUI process over its network API, so it can be MIT-licensed. If you redistribute ComfyUI itself, its GPL terms apply to that distribution.
-- **Model weights** (SDXL checkpoints, LoRAs, ControlNet models) are **not** part of this repository. Each model has its own license (e.g. CreativeML Open RAIL++-M for SDXL base, other licenses for community fine-tunes) — check them before using a model in a public demo, especially for commercial use.
-- Optional custom nodes (e.g. `comfyui_controlnet_aux`) are installed separately and keep their own licenses.
-
----
-
-### 한국어 요약
-
-ComfyUI를 **로컬 GPU 추론 백엔드**로 사용하고, 그 앞에 별도의 **웹 애플리케이션/API 계층**을 둔 생성형 AI 이미지 서비스입니다. 원래 개인용으로 만든 모바일 ComfyUI 클라이언트를 포트폴리오 공개용으로 재구성했습니다.
-
-- 브라우저는 ComfyUI와 직접 통신하지 않습니다. 서버가 허용된 파라미터만 검증해 서버 측 워크플로우 템플릿에 주입하고(노드 ID가 아닌 그래프상 역할로 노드를 찾음), ComfyUI WebSocket으로 진행 상황을 받아 SSE로 브라우저에 전달합니다.
-- 외부 접속은 **커스텀 도메인 → Cloudflare Tunnel → 로컬 웹앱** 구조로, 포트포워딩 없이 HTTPS로 동작하며 ComfyUI 포트는 인터넷에 노출되지 않습니다.
-- 접근 토큰 로그인, 서명된 세션 쿠키, 동시 1건 생성 + 대기열 제한, 속도 제한, 요청 스키마 검증, 모델 허용 목록, 타임아웃/재연결/오프라인 처리를 구현했습니다.
+외부 구성 요소 관련 안내:
+- **ComfyUI**는 **GPL-3.0** 라이선스입니다. 이 프로젝트는 ComfyUI 코드를 포함·수정·링크하지 않고, 따로 설치된 ComfyUI 프로세스와 네트워크 API로만 통신하므로 MIT로 배포할 수 있습니다. ComfyUI 자체를 재배포한다면 그 배포에는 GPL 조건이 적용됩니다.
+- **모델 파일**(SDXL 체크포인트, LoRA, ControlNet 모델)은 이 저장소에 **포함되지 않습니다.** 모델마다 라이선스가 따로 있으니(예: SDXL base는 CreativeML Open RAIL++-M, 커뮤니티 파인튜닝 모델은 각자의 라이선스) 공개 데모, 특히 상업적 용도로 쓰기 전에 확인하세요.
+- 선택 커스텀 노드(예: `comfyui_controlnet_aux`)는 따로 설치하며 각자의 라이선스를 따릅니다.

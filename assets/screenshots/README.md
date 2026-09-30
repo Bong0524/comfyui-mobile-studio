@@ -1,12 +1,12 @@
-# Screenshots
+# 스크린샷
 
-Add PNG screenshots here with these exact file names — the main README already links to them.
+아래 파일 이름 그대로 PNG 스크린샷을 넣으면 README(한국어·영어)에 바로 표시됩니다.
 
-| File | What to capture |
+| 파일 | 찍을 화면 |
 |---|---|
-| `main-ui.png` | Desktop layout (≥ 960 px wide): Create form on the left, result + gallery on the right |
-| `generation-progress.png` | During generation: stage label, step progress bar and live preview |
-| `generated-result.png` | A finished image with Download / Details and the parameter summary |
-| `mobile-ui.png` | Phone-width screenshot (≈ 390 px) of the Create tab |
+| `main-ui.png` | 데스크톱(폭 960px 이상): 왼쪽 만들기 폼, 오른쪽 결과 + 갤러리 |
+| `generation-progress.png` | 생성 중: 단계 이름, 스텝 진행 막대, 실시간 미리보기 |
+| `generated-result.png` | 완성된 이미지와 다운로드 / 상세 정보 버튼, 설정 요약 |
+| `mobile-ui.png` | 휴대폰 폭(약 390px)의 만들기 탭 |
 
-Tip: hide the browser's address bar if it shows your domain.
+팁: 주소창에 개인 도메인이 보이면 가리거나 잘라 주세요.
