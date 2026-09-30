@@ -1,0 +1,21 @@
+{
+  "name": "comfyui-mobile-studio",
+  "version": "1.0.0",
+  "description": "ComfyUI 를 로컬 GPU 추론 백엔드로 쓰는 모바일 우선 생성형 AI 이미지 웹앱",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "setup": "node scripts/init-env.mjs",
+    "models": "node scripts/list-models.mjs",
+    "mock": "node scripts/mock-comfyui.mjs",
+    "tunnel": "node scripts/tunnel.mjs",
+    "workflow:check": "node scripts/workflow-check.mjs",
+    "test": "node --test"
+  }
+}

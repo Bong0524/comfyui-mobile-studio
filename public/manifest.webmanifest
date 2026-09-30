@@ -1,0 +1,13 @@
+{
+  "name": "ComfyUI Mobile Studio",
+  "short_name": "Studio",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#090b11",
+  "theme_color": "#090b11",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

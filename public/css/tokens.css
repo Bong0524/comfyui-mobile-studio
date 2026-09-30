@@ -1,0 +1,74 @@
+/* 디자인 토큰 — 원본 모바일 앱(styles/01-tokens.css)에서 그대로 가져왔다.
+   다른 모든 스타일이 이 변수를 쓰므로 테마는 이 파일 한 곳에서 바뀐다. */
+:root {
+  /* 바탕색 — 푸른빛 도는 검정, 높이(단계)가 분명하게 */
+  --bg: #090b11;
+  --surface: #12161f;
+  --surface-2: #1a1f2b;
+  --surface-3: #262d3d;
+  --border: #2b3244;
+  --border-soft: #1c222f;
+
+  /* 글자색 역할 */
+  --text: #eef1f8;
+  --text-dim: #99a1b4;
+  --text-faint: #667089;
+
+  /* 강조색과 상태색 */
+  --accent: #6d8cff;
+  --accent-press: #5573ef;
+  --accent-soft: rgba(109, 140, 255, .15);
+  --ok: #43d089;
+  --warn: #f5b947;
+  --danger: #ff5f6e;
+  --danger-soft: rgba(255, 95, 110, .13);
+
+  /* 글자 크기 단계 (모바일 기준) */
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 13px;
+  --fs-md: 14px;
+  --fs-lg: 15px;
+  --fs-xl: 17px;
+
+  /* 간격 · 모서리 · 터치 영역 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 8px;
+  --tap: 44px;
+
+  /* 그림자와 움직임 */
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, .35);
+  --shadow-2: 0 12px 34px rgba(0, 0, 0, .55);
+  --dur-1: .12s;
+  --dur-2: .17s;
+  --ease: cubic-bezier(.32, .72, 0, 1);
+}
+
+/* 라이트 테마 — OS 설정을 따른다 (밝은 야외에서 휴대폰으로 볼 때). */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f4f6fb;
+    --surface: #ffffff;
+    --surface-2: #eef1f7;
+    --surface-3: #e0e5ef;
+    --border: #ccd3e0;
+    --border-soft: #e4e8f0;
+    --text: #171b24;
+    --text-dim: #59617a;
+    --text-faint: #838ca3;
+    --accent: #3f60e8;
+    --accent-press: #2f4dcf;
+    --accent-soft: rgba(63, 96, 232, .12);
+    --ok: #16a163;
+    --warn: #c98a12;
+    --danger: #d92c3c;
+    --danger-soft: rgba(217, 44, 60, .10);
+    --shadow-1: 0 1px 3px rgba(20, 26, 40, .10);
+    --shadow-2: 0 12px 34px rgba(20, 26, 40, .18);
+  }
+}

@@ -1,0 +1,54 @@
+# ── 비밀값 · 이 PC 전용 설정 ──
+.env
+.env.*
+!.env.example
+config/models.json
+config/blocked-terms.txt
+*.pem
+*.key
+*.p12
+*.pfx
+*.token
+secrets/
+# Cloudflare Tunnel 인증 파일 (cert.pem, <터널ID>.json) 과 로컬 터널 설정
+.cloudflared/
+deploy/cloudflared/*.json
+deploy/cloudflared/config.yml
+
+# ── 실행 중 생기는 데이터 (갤러리 기록, 생성·업로드 이미지) ──
+data/
+output/
+outputs/
+uploads/
+*.png
+*.jpg
+*.jpeg
+*.webp
+!public/**/*.png
+!public/**/*.svg
+!assets/screenshots/*.png
+
+# ── 의존성 · 가상환경 ──
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# ── 캐시 · 임시 파일 · 로그 ──
+.cache/
+tmp/
+temp/
+*.tmp
+*.log
+npm-debug.log*
+coverage/
+
+# ── OS · 편집기 ──
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp

@@ -1,0 +1,53 @@
+{
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": { "ckpt_name": "sd_xl_base_1.0.safetensors" },
+    "_meta": { "title": "Load Checkpoint" }
+  },
+  "2": {
+    "class_type": "CLIPTextEncode",
+    "inputs": { "text": "", "clip": ["1", 1] },
+    "_meta": { "title": "Positive Prompt" }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": { "text": "", "clip": ["1", 1] },
+    "_meta": { "title": "Negative Prompt" }
+  },
+  "4": {
+    "class_type": "EmptyLatentImage",
+    "inputs": { "width": 1024, "height": 1024, "batch_size": 1 },
+    "_meta": { "title": "Canvas" }
+  },
+  "5": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 0, "steps": 25, "cfg": 6, "sampler_name": "euler", "scheduler": "normal", "denoise": 1,
+      "model": ["1", 0], "positive": ["2", 0], "negative": ["3", 0], "latent_image": ["4", 0]
+    },
+    "_meta": { "title": "Base Sampler" }
+  },
+  "6": {
+    "class_type": "LatentUpscaleBy",
+    "inputs": { "upscale_method": "nearest-exact", "scale_by": 1.5, "samples": ["5", 0] },
+    "_meta": { "title": "Hires Upscale" }
+  },
+  "7": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 0, "steps": 12, "cfg": 6, "sampler_name": "euler", "scheduler": "normal", "denoise": 0.45,
+      "model": ["1", 0], "positive": ["2", 0], "negative": ["3", 0], "latent_image": ["6", 0]
+    },
+    "_meta": { "title": "Hires Sampler" }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["7", 0], "vae": ["1", 2] },
+    "_meta": { "title": "VAE Decode" }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": { "filename_prefix": "portfolio-demo/img", "images": ["8", 0] },
+    "_meta": { "title": "Save Image" }
+  }
+}

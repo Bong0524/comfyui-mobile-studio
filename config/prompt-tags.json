@@ -1,0 +1,351 @@
+[
+  {
+    "group": {
+      "ko": "품질",
+      "en": "Quality"
+    },
+    "tags": [
+      {
+        "label": {
+          "ko": "매우 섬세하게",
+          "en": "highly detailed"
+        },
+        "value": "highly detailed"
+      },
+      {
+        "label": {
+          "ko": "선명한 초점",
+          "en": "sharp focus"
+        },
+        "value": "sharp focus"
+      },
+      {
+        "label": {
+          "ko": "걸작",
+          "en": "masterpiece"
+        },
+        "value": "masterpiece"
+      },
+      {
+        "label": {
+          "ko": "최고 품질",
+          "en": "best quality"
+        },
+        "value": "best quality"
+      },
+      {
+        "label": {
+          "ko": "8K",
+          "en": "8k"
+        },
+        "value": "8k"
+      },
+      {
+        "label": {
+          "ko": "정교한 디테일",
+          "en": "intricate details"
+        },
+        "value": "intricate details"
+      }
+    ]
+  },
+  {
+    "group": {
+      "ko": "조명",
+      "en": "Lighting"
+    },
+    "tags": [
+      {
+        "label": {
+          "ko": "골든아워",
+          "en": "golden hour"
+        },
+        "value": "golden hour"
+      },
+      {
+        "label": {
+          "ko": "부드러운 조명",
+          "en": "soft lighting"
+        },
+        "value": "soft lighting"
+      },
+      {
+        "label": {
+          "ko": "림 라이트",
+          "en": "rim light"
+        },
+        "value": "rim light"
+      },
+      {
+        "label": {
+          "ko": "볼류메트릭 조명",
+          "en": "volumetric light"
+        },
+        "value": "volumetric light"
+      },
+      {
+        "label": {
+          "ko": "네온 조명",
+          "en": "neon lights"
+        },
+        "value": "neon lights"
+      },
+      {
+        "label": {
+          "ko": "스튜디오 조명",
+          "en": "studio lighting"
+        },
+        "value": "studio lighting"
+      },
+      {
+        "label": {
+          "ko": "역광",
+          "en": "backlit"
+        },
+        "value": "backlit"
+      },
+      {
+        "label": {
+          "ko": "흐린 날",
+          "en": "overcast"
+        },
+        "value": "overcast"
+      }
+    ]
+  },
+  {
+    "group": {
+      "ko": "카메라",
+      "en": "Camera"
+    },
+    "tags": [
+      {
+        "label": {
+          "ko": "클로즈업",
+          "en": "close-up"
+        },
+        "value": "close-up"
+      },
+      {
+        "label": {
+          "ko": "와이드 샷",
+          "en": "wide shot"
+        },
+        "value": "wide shot"
+      },
+      {
+        "label": {
+          "ko": "항공 시점",
+          "en": "aerial view"
+        },
+        "value": "aerial view"
+      },
+      {
+        "label": {
+          "ko": "로우 앵글",
+          "en": "low angle"
+        },
+        "value": "low angle"
+      },
+      {
+        "label": {
+          "ko": "접사",
+          "en": "macro"
+        },
+        "value": "macro"
+      },
+      {
+        "label": {
+          "ko": "배경 흐림",
+          "en": "bokeh"
+        },
+        "value": "bokeh"
+      },
+      {
+        "label": {
+          "ko": "35mm",
+          "en": "35mm"
+        },
+        "value": "35mm"
+      },
+      {
+        "label": {
+          "ko": "85mm 렌즈",
+          "en": "85mm lens"
+        },
+        "value": "85mm lens"
+      }
+    ]
+  },
+  {
+    "group": {
+      "ko": "분위기",
+      "en": "Mood"
+    },
+    "tags": [
+      {
+        "label": {
+          "ko": "고요한",
+          "en": "serene"
+        },
+        "value": "serene"
+      },
+      {
+        "label": {
+          "ko": "드라마틱한",
+          "en": "dramatic"
+        },
+        "value": "dramatic"
+      },
+      {
+        "label": {
+          "ko": "동화 같은",
+          "en": "whimsical"
+        },
+        "value": "whimsical"
+      },
+      {
+        "label": {
+          "ko": "신비로운",
+          "en": "mysterious"
+        },
+        "value": "mysterious"
+      },
+      {
+        "label": {
+          "ko": "아늑한",
+          "en": "cozy"
+        },
+        "value": "cozy"
+      },
+      {
+        "label": {
+          "ko": "미래적인",
+          "en": "futuristic"
+        },
+        "value": "futuristic"
+      },
+      {
+        "label": {
+          "ko": "향수를 부르는",
+          "en": "nostalgic"
+        },
+        "value": "nostalgic"
+      }
+    ]
+  },
+  {
+    "group": {
+      "ko": "표현 기법",
+      "en": "Medium"
+    },
+    "tags": [
+      {
+        "label": {
+          "ko": "유화",
+          "en": "oil painting"
+        },
+        "value": "oil painting"
+      },
+      {
+        "label": {
+          "ko": "수채화",
+          "en": "watercolor"
+        },
+        "value": "watercolor"
+      },
+      {
+        "label": {
+          "ko": "디지털 페인팅",
+          "en": "digital painting"
+        },
+        "value": "digital painting"
+      },
+      {
+        "label": {
+          "ko": "3D 렌더",
+          "en": "3d render"
+        },
+        "value": "3d render"
+      },
+      {
+        "label": {
+          "ko": "픽셀 아트",
+          "en": "pixel art"
+        },
+        "value": "pixel art"
+      },
+      {
+        "label": {
+          "ko": "선화",
+          "en": "line art"
+        },
+        "value": "line art"
+      },
+      {
+        "label": {
+          "ko": "사진",
+          "en": "photograph"
+        },
+        "value": "photograph"
+      }
+    ]
+  },
+  {
+    "group": {
+      "ko": "장소",
+      "en": "Setting"
+    },
+    "tags": [
+      {
+        "label": {
+          "ko": "밤의 도시 거리",
+          "en": "city street at night"
+        },
+        "value": "city street at night"
+      },
+      {
+        "label": {
+          "ko": "안개 낀 숲",
+          "en": "misty forest"
+        },
+        "value": "misty forest"
+      },
+      {
+        "label": {
+          "ko": "산속 호수",
+          "en": "mountain lake"
+        },
+        "value": "mountain lake"
+      },
+      {
+        "label": {
+          "ko": "사막 모래언덕",
+          "en": "desert dunes"
+        },
+        "value": "desert dunes"
+      },
+      {
+        "label": {
+          "ko": "우주 정거장",
+          "en": "space station"
+        },
+        "value": "space station"
+      },
+      {
+        "label": {
+          "ko": "아늑한 카페",
+          "en": "cozy cafe"
+        },
+        "value": "cozy cafe"
+      },
+      {
+        "label": {
+          "ko": "고대 유적",
+          "en": "ancient ruins"
+        },
+        "value": "ancient ruins"
+      }
+    ]
+  }
+]

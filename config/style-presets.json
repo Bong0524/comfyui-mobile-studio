@@ -1,0 +1,207 @@
+[
+  {
+    "id": "portrait-studio",
+    "label": {
+      "ko": "스튜디오 인물 사진",
+      "en": "Studio Portrait"
+    },
+    "category": {
+      "ko": "인물",
+      "en": "portrait"
+    },
+    "description": {
+      "ko": "부드러운 조명과 얕은 심도의 인물 사진",
+      "en": "Soft key light, shallow depth of field, natural skin tones."
+    },
+    "positive": "studio portrait photography, soft key light, rim light, 85mm lens, shallow depth of field, natural skin texture, detailed eyes, neutral background",
+    "negative": "harsh shadows, overexposed, distorted face, extra fingers",
+    "recommended": {
+      "steps": 28,
+      "cfg": 5.5,
+      "width": 896,
+      "height": 1152
+    }
+  },
+  {
+    "id": "landscape-golden-hour",
+    "label": {
+      "ko": "골든아워 풍경",
+      "en": "Golden Hour Landscape"
+    },
+    "category": {
+      "ko": "풍경",
+      "en": "landscape"
+    },
+    "description": {
+      "ko": "해 질 녘 따뜻한 빛이 드는 넓은 풍경",
+      "en": "Wide vista with warm, low sunlight and atmospheric depth."
+    },
+    "positive": "breathtaking landscape, golden hour, warm sunlight, volumetric light, atmospheric perspective, wide angle, highly detailed, sharp focus",
+    "negative": "people, text, oversaturated, flat lighting",
+    "recommended": {
+      "steps": 26,
+      "cfg": 6,
+      "width": 1216,
+      "height": 832
+    }
+  },
+  {
+    "id": "illustration-watercolor",
+    "label": {
+      "ko": "수채화 일러스트",
+      "en": "Watercolor Illustration"
+    },
+    "category": {
+      "ko": "일러스트",
+      "en": "illustration"
+    },
+    "description": {
+      "ko": "질감 있는 종이 위의 부드러운 수채화",
+      "en": "Loose watercolor washes on textured paper."
+    },
+    "positive": "watercolor illustration, soft washes, paper texture, delicate ink lines, pastel palette, storybook style",
+    "negative": "photorealistic, 3d render, harsh contrast",
+    "recommended": {
+      "steps": 25,
+      "cfg": 6.5
+    }
+  },
+  {
+    "id": "cinematic-film-still",
+    "label": {
+      "ko": "영화 스틸컷",
+      "en": "Cinematic Film Still"
+    },
+    "category": {
+      "ko": "시네마틱",
+      "en": "cinematic"
+    },
+    "description": {
+      "ko": "아나모픽 화면비, 필름 그레인, 영화 같은 색감",
+      "en": "Anamorphic framing, film grain and moody color grading."
+    },
+    "positive": "cinematic film still, anamorphic lens, dramatic lighting, teal and orange color grading, film grain, shallow depth of field, 35mm",
+    "negative": "cartoon, flat lighting, oversaturated",
+    "recommended": {
+      "steps": 28,
+      "cfg": 5.5,
+      "width": 1344,
+      "height": 768
+    }
+  },
+  {
+    "id": "product-minimal",
+    "label": {
+      "ko": "미니멀 제품 사진",
+      "en": "Minimal Product Shot"
+    },
+    "category": {
+      "ko": "제품",
+      "en": "product"
+    },
+    "description": {
+      "ko": "단색 배경의 깔끔한 쇼핑몰용 제품 사진",
+      "en": "Clean e-commerce style product photo on a seamless backdrop."
+    },
+    "positive": "professional product photography, minimal composition, seamless pastel backdrop, soft box lighting, subtle reflection, centered, high detail, commercial",
+    "negative": "clutter, text, logo, watermark, hands",
+    "recommended": {
+      "steps": 26,
+      "cfg": 6,
+      "width": 1024,
+      "height": 1024
+    }
+  },
+  {
+    "id": "anime-cel",
+    "label": {
+      "ko": "애니메이션 셀 스타일",
+      "en": "Anime Cel Style"
+    },
+    "category": {
+      "ko": "애니메이션",
+      "en": "anime-style"
+    },
+    "description": {
+      "ko": "깔끔한 선화와 셀 셰이딩, 선명한 색",
+      "en": "Clean line art with flat cel shading and vivid colors."
+    },
+    "positive": "anime style illustration, clean line art, cel shading, vibrant colors, detailed background, key visual",
+    "negative": "photorealistic, blurry lines, muddy colors",
+    "recommended": {
+      "steps": 25,
+      "cfg": 6.5,
+      "width": 832,
+      "height": 1216
+    }
+  },
+  {
+    "id": "concept-art-environment",
+    "label": {
+      "ko": "배경 컨셉 아트",
+      "en": "Environment Concept Art"
+    },
+    "category": {
+      "ko": "컨셉 아트",
+      "en": "concept art"
+    },
+    "description": {
+      "ko": "웅장한 스케일의 회화풍 배경 디자인",
+      "en": "Painterly environment design with strong silhouettes."
+    },
+    "positive": "environment concept art, matte painting, painterly, epic scale, strong silhouettes, atmospheric fog, cinematic composition, artstation quality",
+    "negative": "photo, low detail, cluttered composition",
+    "recommended": {
+      "steps": 30,
+      "cfg": 6,
+      "width": 1344,
+      "height": 768
+    }
+  },
+  {
+    "id": "concept-art-character",
+    "label": {
+      "ko": "캐릭터 디자인",
+      "en": "Character Design Sheet"
+    },
+    "category": {
+      "ko": "컨셉 아트",
+      "en": "concept art"
+    },
+    "description": {
+      "ko": "단색 배경의 전신 캐릭터 디자인",
+      "en": "Full-body character design on a plain background."
+    },
+    "positive": "character design, full body, concept art, clean silhouette, costume details, plain light background, digital painting",
+    "negative": "cropped, busy background, extra limbs",
+    "recommended": {
+      "steps": 28,
+      "cfg": 6,
+      "width": 832,
+      "height": 1216
+    }
+  },
+  {
+    "id": "illustration-isometric",
+    "label": {
+      "ko": "아이소메트릭 미니어처",
+      "en": "Isometric Diorama"
+    },
+    "category": {
+      "ko": "일러스트",
+      "en": "illustration"
+    },
+    "description": {
+      "ko": "귀여운 아이소메트릭 미니어처 장면",
+      "en": "Cute isometric miniature scene with soft lighting."
+    },
+    "positive": "isometric diorama, miniature world, soft lighting, pastel colors, tilt-shift, highly detailed, 3d illustration",
+    "negative": "flat, text, cropped",
+    "recommended": {
+      "steps": 25,
+      "cfg": 6,
+      "width": 1024,
+      "height": 1024
+    }
+  }
+]

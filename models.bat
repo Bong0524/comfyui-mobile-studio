@@ -1,0 +1,24 @@
+@echo off
+setlocal
+title ComfyUI Mobile Studio - models
+cd /d "%~dp0"
+
+rem Lists the checkpoints/LoRAs ComfyUI can see (ComfyUI must be running),
+rem then opens config\models.json so you can choose which ones the demo shows.
+rem ASCII only on purpose - Korean messages are printed by the Node scripts.
+
+where node >nul 2>nul
+if errorlevel 1 goto :nonode
+if not exist "config\models.json" node scripts\init-env.mjs
+
+node scripts\list-models.mjs
+echo.
+pause
+notepad "config\models.json"
+goto :end
+
+:nonode
+echo [!] Node.js was not found. Install Node.js 22 LTS or newer: https://nodejs.org
+pause
+
+:end

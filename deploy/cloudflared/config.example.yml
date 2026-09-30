@@ -1,0 +1,17 @@
+# Cloudflare Tunnel — 대시보드/토큰 방식 대신 설정 파일로 관리하는 방법 (선택).
+# deploy/cloudflared/config.yml 로 복사하고 (git 에 안 올라감) <...> 부분을 바꾸세요.
+#
+#   cloudflared tunnel login
+#   cloudflared tunnel create comfyui-studio          # <터널ID>.json 인증 파일이 만들어짐
+#   cloudflared tunnel route dns comfyui-studio <demo.내도메인.com>
+#   cloudflared tunnel --config deploy/cloudflared/config.yml run
+#
+# 웹앱만 공개합니다. ComfyUI(8188 포트)는 일부러 넣지 않았습니다.
+
+tunnel: <TUNNEL-ID>
+credentials-file: <PATH-TO>/<TUNNEL-ID>.json
+
+ingress:
+  - hostname: <demo.your-domain.com>
+    service: http://127.0.0.1:8080
+  - service: http_status:404
