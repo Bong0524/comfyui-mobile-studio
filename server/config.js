@@ -104,7 +104,9 @@ export function createConfig(env = process.env) {
     outputSubfolder: str(env, "OUTPUT_SUBFOLDER", "portfolio-demo").replace(/[^\w-]/g, "_"),
     workflowFile: resolvePath(str(env, "WORKFLOW_FILE", "workflows/txt2img.api.json")),
     modelsFile: resolvePath(str(env, "MODELS_CONFIG", "config/models.json")),
-    modelListMode: str(env, "MODEL_LIST_MODE", "allowlist").toLowerCase(),
+    modelListMode: str(env, "MODEL_LIST_MODE", "folder").toLowerCase(),
+    // 포트폴리오 전용 모델 하위 폴더 이름 (models/checkpoints/<이름>/, models/loras/<이름>/)
+    modelFolder: str(env, "MODEL_FOLDER", "portfolio").replace(/^[\\/]+|[\\/]+$/g, ""),
     stylePresetsFile: resolvePath(str(env, "STYLE_PRESETS_FILE", "config/style-presets.json")),
     promptTagsFile: resolvePath(str(env, "PROMPT_TAGS_FILE", "config/prompt-tags.json")),
     blockedTermsFile: resolvePath(str(env, "BLOCKED_TERMS_FILE", "config/blocked-terms.txt")),
@@ -118,7 +120,8 @@ export function createConfig(env = process.env) {
     ephemeralSecret: false,
   };
 
-  if (!["allowlist", "all"].includes(cfg.modelListMode)) throw new Error('MODEL_LIST_MODE 는 "allowlist" 또는 "all" 이어야 합니다');
+  if (!["folder", "allowlist", "all"].includes(cfg.modelListMode)) throw new Error('MODEL_LIST_MODE 는 "folder", "allowlist", "all" 중 하나여야 합니다');
+  if (cfg.modelListMode === "folder" && (!/^[\w.-]+([\\/][\w.-]+)*$/.test(cfg.modelFolder) || cfg.modelFolder.split(/[\\/]/).includes(".."))) throw new Error(`MODEL_FOLDER 가 올바른 폴더 이름이 아닙니다: "${cfg.modelFolder}"`);
   if (!["none", "openpose"].includes(cfg.controlnetPreprocessor)) throw new Error('CONTROLNET_PREPROCESSOR 는 "none" 또는 "openpose" 여야 합니다');
   if (cfg.publicOrigin) {
     try { const u = new URL(cfg.publicOrigin); if (u.origin !== cfg.publicOrigin) throw new Error(); }

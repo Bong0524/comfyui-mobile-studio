@@ -3,8 +3,9 @@ setlocal
 title ComfyUI Mobile Studio - models
 cd /d "%~dp0"
 
-rem Lists the checkpoints/LoRAs ComfyUI can see (ComfyUI must be running),
-rem then opens config\models.json so you can choose which ones the demo shows.
+rem Lists the checkpoints/LoRAs ComfyUI can see (ComfyUI must be running) and
+rem marks the ones the app publishes (default: models in the "portfolio"
+rem sub-folder), then opens config\models.json for optional labels/defaults.
 rem ASCII only on purpose - Korean messages are printed by the Node scripts.
 
 where node >nul 2>nul

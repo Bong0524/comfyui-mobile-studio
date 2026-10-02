@@ -1,5 +1,5 @@
 {
-  "_comment": "config/models.json 으로 복사해서 데모에 보여 줄 모델만 적으세요 (models.bat 으로 ComfyUI 에 있는 이름을 확인할 수 있습니다). 이름은 ComfyUI 에 보이는 그대로, 하위 폴더 포함 (Windows 에서는 \\ 를 \\\\ 로). 예: \"SDXL\\\\model.safetensors\"",
+  "_comment": "선택 사항. MODEL_LIST_MODE=folder(기본)에서는 전용 폴더(checkpoints/portfolio/, loras/portfolio/)에 넣은 모델이 자동으로 공개되므로, 여기에는 표시 이름·기본 모델·LoRA 강도만 적으면 됩니다. 여기 적은 모델은 폴더 밖에 있어도 공개됩니다. 이름은 ComfyUI 에 보이는 그대로, 하위 폴더 포함 (Windows 에서는 \\ 를 \\\\ 로). 예: \"portfolio\\\\model.safetensors\" — 정확한 이름은 models.bat 으로 확인",
   "checkpoints": [
     {
       "name": "sd_xl_base_1.0.safetensors",

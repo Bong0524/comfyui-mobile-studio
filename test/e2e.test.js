@@ -96,10 +96,11 @@ test("로그인: 틀린 비밀번호와 다른 사이트의 요청을 거절한�
   cookie = set.split(";")[0];
 });
 
-test("카탈로그는 허용 목록에 있고 설치된 모델만 공개한다", async () => {
+test("카탈로그는 전용 폴더와 허용 목록에 있는, 설치된 모델만 공개한다", async () => {
   const cat = await (await api("/api/catalog")).json();
-  assert.deepEqual(cat.checkpoints.map((c) => c.name), ["sd_xl_base_1.0.safetensors"]);
-  assert.deepEqual(cat.loras.map((l) => l.name), ["example_style_lora.safetensors"]);
+  assert.deepEqual(cat.checkpoints.map((c) => c.name), ["portfolio\\demo_sdxl.safetensors", "sd_xl_base_1.0.safetensors"]);
+  assert.deepEqual(cat.loras.map((l) => l.name), ["portfolio\\demo_style.safetensors", "example_style_lora.safetensors"]);
+  assert.equal(cat.checkpoints[0].label, "demo_sdxl", "표시 이름은 파일 이름에서");
   assert.equal(cat.features.controlnet, true);
   assert.equal(cat.features.preprocessor, true);
   assert.ok(cat.stylePresets.length >= 7);

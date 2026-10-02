@@ -186,8 +186,8 @@ export function startMockComfy({ port = 8199, host = "127.0.0.1", stepMs = 60, q
       if (p.startsWith("/object_info/")) {
         const cls = decodeURIComponent(p.slice("/object_info/".length));
         const req2 = {
-          CheckpointLoaderSimple: { ckpt_name: [["sd_xl_base_1.0.safetensors", "another_model.safetensors"]] },
-          LoraLoader: { lora_name: [["example_style_lora.safetensors", "unlisted_lora.safetensors"]] },
+          CheckpointLoaderSimple: { ckpt_name: [["another_model.safetensors", "portfolio\\demo_sdxl.safetensors", "sd_xl_base_1.0.safetensors"]] },
+          LoraLoader: { lora_name: [["example_style_lora.safetensors", "portfolio\\demo_style.safetensors", "unlisted_lora.safetensors"]] },
           KSampler: { sampler_name: [["euler", "euler_ancestral", "dpmpp_2m"]], scheduler: [["normal", "karras", "simple"]] },
           ControlNetLoader: { control_net_name: [["mock_openpose.safetensors"]] },
           OpenposePreprocessor: { image: ["IMAGE"] },

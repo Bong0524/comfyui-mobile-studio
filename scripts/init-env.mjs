@@ -30,5 +30,6 @@ if (!fs.existsSync(envFile)) {
 
 if (!fs.existsSync(modelsFile)) {
   fs.copyFileSync(path.join(ROOT_DIR, "config", "models.example.json"), modelsFile, fs.constants.COPYFILE_EXCL);
-  console.log("config/models.json 을 만들었습니다 — 데모에서 쓸 체크포인트/LoRA 를 ComfyUI 에 보이는 이름 그대로 적어 주세요.");
+  console.log("config/models.json 을 만들었습니다 (선택: 표시 이름·기본 모델).");
+  console.log("데모용 모델은 ComfyUI 모델 폴더의 checkpoints/portfolio/, loras/portfolio/ 에 넣으세요.");
 }

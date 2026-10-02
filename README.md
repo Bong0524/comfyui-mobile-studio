@@ -70,7 +70,7 @@ sequenceDiagram
 **생성**
 - 프롬프트와 네거티브 프롬프트, 누르면 추가되는 *프롬프트 도우미*(분류별 키워드 칩)
 - 스타일 프리셋: 인물, 풍경, 일러스트, 시네마틱, 제품, 애니메이션, 컨셉 아트 — 추천 스텝·CFG·크기도 함께 적용 가능
-- 체크포인트 선택, LoRA 여러 개와 개별 강도 (목록은 ComfyUI에서 받아 허용 목록으로 거름)
+- 체크포인트 선택, LoRA 여러 개와 개별 강도 (목록은 ComfyUI에서 받아 포트폴리오 전용 폴더로 거름)
 - 이미지 크기 프리셋(SDXL 화면비), 생성 개수, 시드(랜덤 / 고정 / 이전 시드 재사용), 스텝, CFG
 - *고급 설정*: 샘플러·스케줄러(ComfyUI에서 목록을 받음), 선택형 Hires fix 2차 생성
 - 선택 기능 — ControlNet 포즈·참조 이미지: 이미지 업로드, 또는 내장 OpenPose 뼈대 에디터로 **포즈 직접 그리기**, 사진에서 포즈 추출
@@ -122,9 +122,9 @@ sequenceDiagram
 | `start-demo.bat` | ComfyUI를 켜고(`COMFYUI_DIR`이 설정돼 있고 꺼져 있을 때, 이 PC 안에서만 접속되게) 응답할 때까지 기다린 뒤, 웹앱을 켜고, `CLOUDFLARE_TUNNEL_TOKEN`이 있으면 Cloudflare Tunnel까지 켜고 브라우저를 엽니다. |
 | `start.bat` | ComfyUI가 이미 켜져 있을 때 웹앱만 현재 창에서 실행합니다. |
 | `test.bat` | 테스트와 워크플로우 점검을 실행합니다. |
-| `models.bat` | ComfyUI가 인식한 체크포인트·LoRA 목록을 보여 주고(ComfyUI가 켜져 있어야 함), 데모에 보여 줄 모델을 고르도록 `config/models.json`을 엽니다. |
+| `models.bat` | ComfyUI가 인식한 체크포인트·LoRA 목록을 보여 주고(ComfyUI가 켜져 있어야 함) 그중 앱에 공개되는 모델을 ✓로 표시한 뒤, 표시 이름·기본 모델을 바꿀 수 있게 `config/models.json`을 엽니다(선택). |
 
-처음 실행하면 `.env`(랜덤 `ACCESS_TOKEN` · `SESSION_SECRET`, 비밀번호는 한 번 화면에 표시)와 `config/models.json`이 자동으로 만들어지고, 메모장으로 `.env`가 열립니다. `COMFYUI_DIR`에 ComfyUI 포터블 폴더를 적고(비워 두면 드라이브에서 찾아봅니다), `config/models.json`에 모델을 적은 뒤 `start-demo.bat`을 다시 실행하세요.
+처음 실행하면 `.env`(랜덤 `ACCESS_TOKEN` · `SESSION_SECRET`, 비밀번호는 한 번 화면에 표시)와 `config/models.json`이 자동으로 만들어지고, 메모장으로 `.env`가 열립니다. `COMFYUI_DIR`에 ComfyUI 포터블 폴더를 적고(비워 두면 드라이브에서 찾아봅니다), 데모용 모델을 `portfolio` 전용 폴더에 넣은 뒤([ComfyUI 설정](#comfyui-설정-comfyui-setup) 참고) `start-demo.bat`을 다시 실행하세요.
 
 ### 다른 OS — 직접 실행
 
@@ -162,7 +162,7 @@ npm start
 | `ACCESS_TOKEN` | **필수.** 방문자가 입력할 로그인 비밀번호(8자 이상). 없으면 서버가 시작하지 않습니다. |
 | `SESSION_SECRET` | 세션 쿠키 서명 키. 설정해 두면 재시작해도 로그인이 유지됩니다. |
 | `API_KEY` | 선택: 스크립트 호출용 Bearer 키. |
-| `MODEL_LIST_MODE`, `MODELS_CONFIG` | `allowlist`(기본)는 `config/models.json`에 있으면서 ComfyUI에 실제로 설치된 모델만 공개합니다. |
+| `MODEL_LIST_MODE`, `MODEL_FOLDER`, `MODELS_CONFIG` | `folder`(기본)는 전용 하위 폴더 `MODEL_FOLDER`(`portfolio`) 안의 모델과 `config/models.json`에 적은 모델만 공개합니다. `allowlist`는 적은 모델만, `all`은 전부 공개합니다. 어느 모드든 ComfyUI에 실제로 설치된 모델만 보입니다. |
 | `MAX_*`, `*_RATE_LIMIT_PER_MIN`, `MAX_PENDING_JOBS` | 데모 제한값(스텝, 픽셀, 생성 개수, LoRA, 업로드 크기, 대기열). |
 | `JOB_IDLE_TIMEOUT_SEC`, `JOB_MAX_DURATION_SEC` | 무응답 시간 제한과 작업당 최대 시간. |
 | `SAFETY_NEGATIVE`, `BLOCKED_TERMS_FILE` | 모든 네거티브 프롬프트 뒤에 항상 붙일 문구, 목록의 단어가 든 프롬프트는 거절(둘 다 선택, 목록은 `config/blocked-terms.example.txt`를 복사해 작성하며 Git에 올라가지 않음). |
@@ -181,7 +181,16 @@ npm start
    ```
    브라우저가 ComfyUI를 직접 부르지 않으므로 `--enable-cors-header`는 필요 없습니다.
 
-2. **모델 파일은 이 저장소가 아니라 ComfyUI에 둡니다.** SDXL 체크포인트는 `ComfyUI/models/checkpoints/`, LoRA는 `ComfyUI/models/loras/`에 넣습니다(또는 `extra_model_paths.yaml`로 연결한 폴더). 그다음 `models.bat` / `npm run models`로 ComfyUI가 인식한 정확한 이름을 확인하고, 데모에서 쓸 모델만 `config/models.json`에 복사합니다(하위 폴더 포함, Windows에서는 `"SDXL\\model.safetensors"`처럼 `\`를 두 번).
+2. **모델 파일은 이 저장소가 아니라 ComfyUI 모델 폴더의 `portfolio` 전용 하위 폴더에 둡니다.** 앱은 이 폴더 안의 모델만 공개하므로, 같은 ComfyUI에 다른 모델이 있어도 데모 화면에는 나오지 않습니다.
+
+   ```text
+   <ComfyUI 모델 폴더>/               ComfyUI/models/ 또는 extra_model_paths.yaml 로 연결한 폴더
+   ├─ checkpoints/portfolio/          데모용 SDXL 체크포인트
+   ├─ loras/portfolio/                데모용 LoRA
+   └─ controlnet/                     OpenPose ControlNet (선택, CONTROLNET_MODEL)
+   ```
+
+   파일을 넣은 뒤 ComfyUI를 다시 켜고 `models.bat` / `npm run models`로 공개되는 모델(✓)을 확인합니다. 표시 이름·기본 모델·LoRA 강도는 `config/models.json`에서 바꿀 수 있습니다(선택, Windows에서는 `"portfolio\\model.safetensors"`처럼 `\`를 두 번). 폴더 이름은 `MODEL_FOLDER`로 바꿀 수 있습니다.
 
 3. **워크플로우** — `workflows/txt2img.api.json`은 **ComfyUI 기본 노드만** 사용하므로 커스텀 노드가 필요 없습니다.
 
@@ -240,7 +249,7 @@ comfyui-mobile-studio/
 │  ├─ app.js                  라우트, SSE, 이미지 중계, 정적 파일
 │  ├─ config.js               환경변수 읽기 + 검사 (위험한 설정이면 시작 거부)
 │  ├─ security.js             로그인, 서명 세션, 요청 횟수 제한, Origin 확인
-│  ├─ catalog.js              모델·LoRA·샘플러 (ComfyUI ∩ 허용 목록), 프리셋
+│  ├─ catalog.js              모델·LoRA·샘플러 (ComfyUI ∩ 전용 폴더), 프리셋
 │  ├─ job-manager.js          GPU 1건씩 처리하는 대기열, WebSocket 이벤트 처리, 시간 제한
 │  ├─ history-store.js        최근 결과 갤러리 (data/history.json)
 │  ├─ uploads.js              참조 이미지 업로드 (매직 바이트 확인, 무작위 이름)

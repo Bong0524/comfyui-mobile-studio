@@ -22,7 +22,7 @@ flowchart TB
             V["workflow/validate.js<br/>schema · limits · allowlists"]
             W["workflow/resolve-nodes.js<br/>workflow/build-workflow.js"]
             J["job-manager.js<br/>queue · timeouts · events"]
-            K["catalog.js<br/>models ∩ allowlist · presets"]
+            K["catalog.js<br/>models ∩ portfolio folder · presets"]
             H["history-store.js<br/>data/history.json"]
             UP["uploads.js"]
             CC["comfy/client.js (HTTP)"]
@@ -50,7 +50,7 @@ flowchart TB
 | `server/config.js` | Reads `.env`, validates values, refuses unsafe setups (no `ACCESS_TOKEN`, malformed origin, …). |
 | `server/app.js` | HTTP routes, SSE stream per job, streaming image proxy, static files, security headers. |
 | `server/security.js` | Access-token sign-in, HMAC-signed session cookies, bearer API key, fixed-window rate limiter, Origin (CSRF) check. |
-| `server/catalog.js` | Asks ComfyUI (`/object_info`) which checkpoints, LoRAs, samplers and schedulers exist; intersects them with `config/models.json`; loads presets, prompt tags and blocked terms. Cached for 60 s. |
+| `server/catalog.js` | Asks ComfyUI (`/object_info`) which checkpoints, LoRAs, samplers and schedulers exist; publishes only the checkpoints/LoRAs inside the dedicated `portfolio` sub-folder (`MODEL_FOLDER`) or listed in `config/models.json`; loads presets, prompt tags and blocked terms. Cached for 60 s. |
 | `server/workflow/validate.js` | Turns an untrusted JSON body into normalized parameters, or rejects it. |
 | `server/workflow/resolve-nodes.js` | Finds the nodes the app needs **by their role in the graph** (see §4). |
 | `server/workflow/build-workflow.js` | Pure function: template + roles + parameters → API-format workflow. |

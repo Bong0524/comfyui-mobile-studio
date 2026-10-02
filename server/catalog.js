@@ -1,10 +1,13 @@
 /**
  * 화면에 보여 줄 수 있는 목록: 모델, LoRA, 샘플러, 크기, 프리셋.
  *
- * 모델 이름은 두 곳에서 오고, 둘 다에 있는 것만 공개한다:
- *   1. ComfyUI 에 실제로 설치된 것 (`/object_info`, 잠깐 캐시)
- *   2. 운영자가 config/models.json 에 적어 둔 허용 목록 (MODEL_LIST_MODE=allowlist)
- * 그래서 GPU PC 에 모델이 훨씬 많아도, 공개 데모에는 일부러 고른 모델만 드러난다.
+ * 모델은 ComfyUI 에 실제로 설치된 것(`/object_info`, 잠깐 캐시) 중에서 다음 규칙으로 고른다.
+ *   - MODEL_LIST_MODE=folder (기본): 전용 하위 폴더(MODEL_FOLDER, 기본 "portfolio")에 넣은 모델만.
+ *       예) models/checkpoints/portfolio/model.safetensors, models/loras/portfolio/style.safetensors
+ *       config/models.json 이 있으면 표시 이름·기본값·LoRA 강도·트리거 단어를 덧붙이고, 거기 적은 모델도 함께 공개한다.
+ *   - MODEL_LIST_MODE=allowlist: config/models.json 에 적은 모델만.
+ *   - MODEL_LIST_MODE=all: 설치된 모든 모델 (개인용으로만).
+ * 그래서 GPU PC 에 다른 모델이 아무리 많아도, 공개 데모에는 일부러 골라 넣은 모델만 드러난다.
  */
 import fs from "node:fs";
 
@@ -125,24 +128,55 @@ export class Catalog {
     return this.pending;
   }
 
-  /** 사용자가 고를 수 있는 체크포인트 (허용 목록 ∩ 설치된 것). */
+  /** ComfyUI 이름이 전용 하위 폴더 안에 있는가 (Windows 는 "portfolio\\x", 그 밖은 "portfolio/x"). */
+  inModelFolder(name) {
+    const folder = this.config.modelFolder.replace(/\\/g, "/").toLowerCase();
+    return String(name).replace(/\\/g, "/").toLowerCase().startsWith(`${folder}/`);
+  }
+
+  /**
+   * 공개할 모델 이름 목록 (설치된 것만).
+   * folder: 전용 폴더 안의 모델 + models.json 에 적은 모델 / allowlist: models.json 만 / all: 전부
+   */
+  publishedNames(kind) {
+    const installed = this.installed[kind];
+    const installedSet = new Set(installed);
+    const listed = this.allow[kind].map((m) => m.name).filter((n) => installedSet.has(n));
+    if (this.config.modelListMode === "all") return installed;
+    if (this.config.modelListMode === "allowlist") return listed;
+    const inFolder = installed.filter((n) => this.inModelFolder(n));
+    return [...new Set([...inFolder, ...listed])];
+  }
+
+  /** models.json 에 적힌 항목(표시 이름·기본값 등)을 찾는다. 없으면 빈 객체. */
+  allowEntry(kind, name) {
+    return this.allow[kind].find((m) => m.name === name) || {};
+  }
+
+  /** 사용자가 고를 수 있는 체크포인트. */
   get checkpoints() {
-    const installed = new Set(this.installed.checkpoints);
-    if (this.config.modelListMode === "all") return this.installed.checkpoints.map((name) => ({ name, label: baseName(name) }));
-    const defaultName = this.template[this.roles.checkpoint].inputs.ckpt_name;
-    const list = this.allow.checkpoints.length ? this.allow.checkpoints : [{ name: defaultName, label: baseName(defaultName), default: true }];
-    return list.filter((m) => installed.has(m.name)).map((m) => ({ name: m.name, label: String(m.label || baseName(m.name)), default: !!m.default }));
+    let names = this.publishedNames("checkpoints");
+    // allowlist 모드인데 models.json 이 비어 있으면 워크플로우 기본 체크포인트만 허용
+    if (!names.length && this.config.modelListMode === "allowlist" && !this.allow.checkpoints.length) {
+      const defaultName = this.template[this.roles.checkpoint].inputs.ckpt_name;
+      if (this.installed.checkpoints.includes(defaultName)) names = [defaultName];
+    }
+    return names.map((name) => {
+      const m = this.allowEntry("checkpoints", name);
+      return { name, label: String(m.label || baseName(name)), default: !!m.default };
+    });
   }
 
   get loras() {
-    const installed = new Set(this.installed.loras);
-    if (this.config.modelListMode === "all") return this.installed.loras.map((name) => ({ name, label: baseName(name), strength: 0.8 }));
-    return this.allow.loras.filter((m) => installed.has(m.name)).map((m) => ({
-      name: m.name,
-      label: String(m.label || baseName(m.name)),
-      strength: Number.isFinite(+m.strength) ? +m.strength : 0.8,
-      triggerWords: typeof m.triggerWords === "string" ? m.triggerWords : "",
-    }));
+    return this.publishedNames("loras").map((name) => {
+      const m = this.allowEntry("loras", name);
+      return {
+        name,
+        label: String(m.label || baseName(name)),
+        strength: Number.isFinite(+m.strength) ? +m.strength : 0.8,
+        triggerWords: typeof m.triggerWords === "string" ? m.triggerWords : "",
+      };
+    });
   }
 
   get sizes() {

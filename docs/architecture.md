@@ -22,7 +22,7 @@ flowchart TB
             V["workflow/validate.js<br/>형식 · 제한값 · 허용 목록"]
             W["workflow/resolve-nodes.js<br/>workflow/build-workflow.js"]
             J["job-manager.js<br/>대기열 · 시간 제한 · 이벤트"]
-            K["catalog.js<br/>모델 ∩ 허용 목록 · 프리셋"]
+            K["catalog.js<br/>모델 ∩ 전용 폴더 · 프리셋"]
             H["history-store.js<br/>data/history.json"]
             UP["uploads.js"]
             CC["comfy/client.js (HTTP)"]
@@ -50,7 +50,7 @@ flowchart TB
 | `server/config.js` | `.env`를 읽고 값을 검사합니다. 위험한 설정(`ACCESS_TOKEN` 없음, 잘못된 주소 등)이면 시작을 거부합니다. |
 | `server/app.js` | HTTP 라우트, 작업별 SSE 스트림, 이미지 중계, 정적 파일, 보안 헤더. |
 | `server/security.js` | 접속 비밀번호 로그인, HMAC 서명 세션 쿠키, Bearer API 키, 고정 창 방식 요청 횟수 제한, Origin(CSRF) 확인. |
-| `server/catalog.js` | ComfyUI(`/object_info`)에 설치된 체크포인트·LoRA·샘플러·스케줄러를 묻고, `config/models.json`과 겹치는 것만 남깁니다. 프리셋·프롬프트 키워드·금지어도 읽습니다. 60초 캐시. |
+| `server/catalog.js` | ComfyUI(`/object_info`)에 설치된 체크포인트·LoRA·샘플러·스케줄러를 묻고, 그중 전용 하위 폴더 `portfolio`(`MODEL_FOLDER`) 안에 있거나 `config/models.json`에 적은 체크포인트·LoRA만 공개합니다. 프리셋·프롬프트 키워드·금지어도 읽습니다. 60초 캐시. |
 | `server/workflow/validate.js` | 믿을 수 없는 JSON 요청을 정리된 파라미터로 바꾸거나 거절합니다. |
 | `server/workflow/resolve-nodes.js` | 앱에 필요한 노드를 **그래프상의 역할로** 찾습니다(§4). |
 | `server/workflow/build-workflow.js` | 순수 함수: 템플릿 + 역할 + 파라미터 → API 형식 워크플로우. |

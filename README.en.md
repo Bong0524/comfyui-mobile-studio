@@ -70,7 +70,7 @@ Everything listed here is implemented in this repository.
 **Generation**
 - Prompt and negative prompt, with a *prompt helper* (clickable keyword chips by category)
 - Style presets: portrait, landscape, illustration, cinematic, product, anime-style, concept art — optionally applying recommended steps / CFG / size
-- Checkpoint selection and up to N LoRAs with per-LoRA strength (lists come from ComfyUI, filtered by an allowlist)
+- Checkpoint selection and up to N LoRAs with per-LoRA strength (lists come from ComfyUI, limited to a dedicated portfolio folder)
 - Image size presets (SDXL aspect ratios), batch size, seed (random / fixed / reuse last), steps, CFG
 - *Advanced Settings*: sampler & scheduler (lists read from ComfyUI), optional hires-fix second pass
 - Optional pose / reference image via ControlNet: upload an image, or **draw a pose** in the built-in OpenPose skeleton editor; optional pose extraction from photos
@@ -122,9 +122,9 @@ Requirements: **Node.js 22+**, a working **ComfyUI** install with an NVIDIA GPU 
 | `start-demo.bat` | Starts ComfyUI (if `COMFYUI_DIR` is set and it isn't running yet, bound to localhost), waits until it answers, starts the web app and — when `CLOUDFLARE_TUNNEL_TOKEN` is set — the Cloudflare Tunnel, then opens the browser. |
 | `start.bat` | Starts only the web app in the current window (ComfyUI already running). |
 | `test.bat` | Runs the test suite and the workflow check. |
-| `models.bat` | Lists the checkpoints / LoRAs ComfyUI can see (ComfyUI must be running) and opens `config/models.json` so you can pick which ones the demo shows. |
+| `models.bat` | Lists the checkpoints / LoRAs ComfyUI can see (ComfyUI must be running), marks the ones the app publishes, and opens `config/models.json` for optional display names / defaults. |
 
-On the first run the launcher creates `.env` with a random `ACCESS_TOKEN` / `SESSION_SECRET` (the token is printed once) and `config/models.json`, then opens `.env` in Notepad. Set `COMFYUI_DIR` to your ComfyUI portable folder, list your models in `config/models.json`, and run `start-demo.bat` again.
+On the first run the launcher creates `.env` with a random `ACCESS_TOKEN` / `SESSION_SECRET` (the token is printed once) and `config/models.json`, then opens `.env` in Notepad. Set `COMFYUI_DIR` to your ComfyUI portable folder, put the demo models into the `portfolio` sub-folders (see [ComfyUI Setup](#comfyui-setup)), and run `start-demo.bat` again.
 
 ### Any OS — manually
 
@@ -135,7 +135,7 @@ cd comfyui-mobile-studio
 
 # 2. Configure: creates .env (random ACCESS_TOKEN / SESSION_SECRET) and config/models.json
 npm run setup
-#    then list the models the demo may use in config/models.json and review .env
+#    then put the demo models into models/checkpoints/portfolio/ and models/loras/portfolio/ and review .env
 
 # 3. Check that the workflow template is usable
 npm run workflow:check
@@ -162,7 +162,7 @@ All settings live in `.env` (git-ignored); `.env.example` documents every key. T
 | `ACCESS_TOKEN` | **Required.** Sign-in password for visitors (≥ 8 chars). The server refuses to start without it. |
 | `SESSION_SECRET` | Signs session cookies. Set it so sessions survive restarts. |
 | `API_KEY` | Optional bearer key for scripted access. |
-| `MODEL_LIST_MODE`, `MODELS_CONFIG` | `allowlist` (default) publishes only models in `config/models.json` that ComfyUI actually has. |
+| `MODEL_LIST_MODE`, `MODEL_FOLDER`, `MODELS_CONFIG` | `folder` (default) publishes only models inside the dedicated sub-folder `MODEL_FOLDER` (`portfolio`) plus anything listed in `config/models.json`. `allowlist` publishes only the listed ones, `all` everything ComfyUI has. Only models ComfyUI actually has are ever shown. |
 | `MAX_*`, `*_RATE_LIMIT_PER_MIN`, `MAX_PENDING_JOBS` | Demo limits (steps, pixels, batch, LoRAs, upload size, queue). |
 | `JOB_IDLE_TIMEOUT_SEC`, `JOB_MAX_DURATION_SEC` | Inactivity timeout and hard ceiling per job. |
 | `SAFETY_NEGATIVE`, `BLOCKED_TERMS_FILE` | A phrase always appended to the negative prompt; prompts containing a listed term are rejected (both optional; copy `config/blocked-terms.example.txt`, the real list stays out of Git). |
@@ -181,7 +181,16 @@ All settings live in `.env` (git-ignored); `.env.example` documents every key. T
    ```
    No `--enable-cors-header` is needed: the browser never calls ComfyUI directly.
 
-2. **Models live in ComfyUI, not in this repository.** Put SDXL checkpoints into `ComfyUI/models/checkpoints/` and LoRAs into `ComfyUI/models/loras/` (or the folders your `extra_model_paths.yaml` points to). Then run `models.bat` / `npm run models` to see the exact names ComfyUI reports and copy the ones the demo may use into `config/models.json` (sub-folders included, e.g. `"SDXL\\model.safetensors"` on Windows).
+2. **Models live in ComfyUI, not in this repository — in a dedicated `portfolio` sub-folder.** The app only publishes models from that sub-folder, so other models in the same ComfyUI install never show up in the demo:
+
+   ```text
+   <ComfyUI model folder>/            ComfyUI/models/ or the folder extra_model_paths.yaml points to
+   ├─ checkpoints/portfolio/          SDXL checkpoints for the demo
+   ├─ loras/portfolio/                LoRAs for the demo
+   └─ controlnet/                     OpenPose ControlNet (optional, CONTROLNET_MODEL)
+   ```
+
+   Restart ComfyUI after adding files, then run `models.bat` / `npm run models` to check what is published (✓). Display names, the default model and LoRA strength can optionally be set in `config/models.json` (e.g. `"portfolio\\model.safetensors"` on Windows). Change the folder name with `MODEL_FOLDER`.
 
 3. **Workflow** — `workflows/txt2img.api.json` uses **core nodes only**, so no custom nodes are required:
 
@@ -239,7 +248,7 @@ comfyui-mobile-studio/
 │  ├─ app.js                  routes, SSE, image proxy, static files
 │  ├─ config.js               env parsing + validation (refuses unsafe configs)
 │  ├─ security.js             sign-in, signed sessions, rate limits, Origin check
-│  ├─ catalog.js              models/LoRAs/samplers (ComfyUI ∩ allowlist), presets
+│  ├─ catalog.js              models/LoRAs/samplers (ComfyUI ∩ portfolio folder), presets
 │  ├─ job-manager.js          single-GPU queue, WebSocket event handling, timeouts
 │  ├─ history-store.js        recent-results gallery (data/history.json)
 │  ├─ uploads.js              reference-image uploads (magic-byte check, random names)
