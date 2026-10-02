@@ -265,15 +265,16 @@ comfyui-mobile-studio/
 │  ├─ css/tokens.css, app.css
 │  └─ js/ main · api · i18n(한/영) · status · form · generate · gallery · reference · pose-editor · ui
 ├─ workflows/txt2img.api.json ComfyUI 워크플로우 템플릿 (기본 노드만)
-├─ config/                    스타일 프리셋, 프롬프트 키워드, 모델 허용 목록 예시, 금지어 목록 예시
+├─ config/                    스타일 프리셋, 프롬프트 키워드, 모델 표시 이름 예시, 금지어 목록 예시
 ├─ start-demo.bat             Windows: ComfyUI + 앱 + 터널 + 브라우저를 한 번에
 ├─ start.bat · test.bat       Windows: 앱만 실행 / 테스트
-├─ models.bat                 Windows: ComfyUI 모델 목록 확인, 허용 목록 편집
+├─ models.bat                 Windows: 공개되는 모델 확인, 표시 이름 편집
 ├─ scripts/                   가짜 ComfyUI, 터널 실행, 워크플로우 점검, 첫 실행 설정,
 │                             .bat 도우미 (env-get, wait-for, check-setup, say = 한글 안내 문구)
 ├─ test/                      단위 + 통합 테스트 (node:test)
 ├─ deploy/cloudflared/        설정 파일 방식 터널 예시 (인증 정보 없음)
 ├─ docs/architecture*.md      상세 구조와 데이터 흐름 (한국어 / 영어)
+├─ CHANGELOG*.md              변경 이력 (한국어 / 영어)
 └─ assets/screenshots/        README 이미지
 ```
 
@@ -294,6 +295,10 @@ npm test          # Windows: test.bat
 - 이미지→이미지, 인페인팅 워크플로우 (원래 개인용 버전에는 있는 기능)
 - 클라우드 GPU 배포 옵션 (컨테이너 + 관리형 GPU 인스턴스)
 - CI에서 화면 스크린샷 비교 자동 테스트
+
+## 변경 이력 (Changelog)
+
+버전별 변경 사항은 [CHANGELOG.md](CHANGELOG.md)에 있습니다. 최신 버전: **1.1.0** — 포트폴리오 전용 모델 폴더.
 
 ## 라이선스 (License)
 

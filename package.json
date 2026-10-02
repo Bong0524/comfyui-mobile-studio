@@ -1,6 +1,6 @@
 {
   "name": "comfyui-mobile-studio",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "ComfyUI 를 로컬 GPU 추론 백엔드로 쓰는 모바일 우선 생성형 AI 이미지 웹앱",
   "type": "module",
   "private": true,

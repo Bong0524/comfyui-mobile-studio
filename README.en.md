@@ -264,15 +264,16 @@ comfyui-mobile-studio/
 │  ├─ css/tokens.css, app.css
 │  └─ js/ main · api · i18n (ko/en) · status · form · generate · gallery · reference · pose-editor · ui
 ├─ workflows/txt2img.api.json ComfyUI workflow template (core nodes only)
-├─ config/                    style presets, prompt tags, model allowlist example, blocked-terms example
+├─ config/                    style presets, prompt tags, model display-name example, blocked-terms example
 ├─ start-demo.bat            Windows: ComfyUI + app + tunnel + browser in one click
 ├─ start.bat · test.bat       Windows: app only / run tests
-├─ models.bat                 Windows: list ComfyUI models, edit the allowlist
+├─ models.bat                 Windows: check published models, edit display names
 ├─ scripts/                   mock ComfyUI, tunnel launcher, workflow checker, first-run setup,
 │                             helpers for the .bat launchers (env-get, wait-for, check-setup, say = Korean console messages)
 ├─ test/                      unit + end-to-end tests (node:test)
 ├─ deploy/cloudflared/        locally-managed tunnel config example (no credentials)
 ├─ docs/architecture*.md      detailed architecture and data flow (Korean / English)
+├─ CHANGELOG*.md              changelog (Korean / English)
 └─ assets/screenshots/        README images
 ```
 
@@ -293,6 +294,10 @@ npm test
 - Image-to-image and inpainting workflows (the original personal version has them)
 - Cloud GPU deployment option (container + managed GPU instance)
 - Automated screenshot/visual regression tests in CI
+
+## Changelog
+
+See [CHANGELOG.en.md](CHANGELOG.en.md) for changes by version. Latest: **1.1.0** — dedicated portfolio model folder.
 
 ## License
 
