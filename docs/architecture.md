@@ -58,6 +58,7 @@ flowchart TB
 | `server/comfy/client.js` | 실제로 쓰는 ComfyUI 엔드포인트만 감싼 얇은 클라이언트. |
 | `server/comfy/monitor.js` | ComfyUI와 계속 연결된 WebSocket 하나. 끊기면 간격을 늘려 가며 다시 연결합니다. |
 | `server/history-store.js` | 최근 결과(정보만) 저장. 원자적으로 기록합니다. |
+| `public/js/tag-dict.js` 외 | 태그 사전(정적 JSON)을 처음 쓸 때 한 번 받아 브라우저에서 검색합니다(영어 · 한국어 별칭 · 초성). 자동완성 · 프롬프트 칩 · 사전 탐색이 같은 색인을 씁니다. 서버는 파일을 gzip 으로 보내기만 하고, 사전은 생성 요청 검사와 무관합니다. |
 | `server/uploads.js` | 참조 이미지 업로드: 매직 바이트로 형식 확인, 무작위 이름, ComfyUI input 폴더로 전달. |
 | `public/js/*` | 화면 모듈: `api`(시간 제한 + 응답 확인), `i18n`(한국어 기본 / English), `status`, `form`, `generate`(SSE + 폴링 대체), `gallery`, `reference`, `pose-editor`. |
 

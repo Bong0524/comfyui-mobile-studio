@@ -64,7 +64,7 @@ img { max-width: 100%; display: block; }
 .card-head.sub { margin-top: var(--sp-3); }
 .card-head label, .label { font-weight: 650; font-size: var(--fs-md); }
 .counter { font-size: var(--fs-xs); color: var(--text-faint); }
-textarea, input[type="text"], input[type="number"], input[type="password"], select {
+textarea, input[type="text"], input[type="search"], input[type="number"], input[type="password"], select {
   width: 100%; min-height: var(--tap);
   background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
   padding: 10px 12px; font-size: var(--fs-lg);
@@ -253,3 +253,80 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent-soft
   .toasts { bottom: 24px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ── 태그 사전: 자동완성 · 프롬프트 칩 · 사전 탐색 ── */
+.card-head-side { display: inline-flex; align-items: center; gap: var(--sp-2); }
+#dictBtn { min-height: 30px; padding: 0 10px; }
+
+.ac-wrap { position: relative; }
+.ac-list {
+  position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 30;
+  margin: 0; padding: 4px; list-style: none; max-height: min(320px, 45dvh); overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-2);
+}
+.ac-list li {
+  display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: baseline;
+  padding: 8px 10px; border-radius: var(--radius-xs); cursor: pointer;
+}
+.ac-list li[aria-selected="true"], .ac-list li:hover { background: var(--accent-soft); }
+.ac-tag { font-weight: 650; }
+.ac-ko { color: var(--text-dim); font-size: var(--fs-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ac-meta { grid-column: 1 / -1; color: var(--text-faint); font-size: var(--fs-xs); }
+
+.prompt-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--sp-2); }
+.pchip {
+  display: inline-flex; align-items: baseline; gap: 5px; max-width: 100%;
+  border: 1px dashed var(--border); background: var(--surface-2); color: var(--text-dim);
+  border-radius: 999px; padding: 5px 11px; font-size: var(--fs-sm); cursor: pointer;
+}
+.pchip.known { border-style: solid; color: var(--text); }
+.pchip-main { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 22ch; }
+.pchip small { color: var(--text-faint); font-size: var(--fs-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 16ch; }
+.pchip-w { font-size: var(--fs-xs); color: var(--accent); font-weight: 700; }
+.pchip.up { border-color: var(--accent); }
+.pchip.down { opacity: .75; }
+.pchip:hover { background: var(--surface-3); }
+
+.chip-modal { width: min(440px, calc(100vw - 24px)); }
+.chip-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); }
+.chip-tag { font-size: var(--fs-lg); word-break: break-word; }
+.chip-ko { margin: 0; font-weight: 600; }
+.chip-desc { margin: 0; white-space: pre-wrap; }
+.chip-path { margin: 0; color: var(--text-faint); }
+.chip-weight { display: flex; align-items: center; gap: var(--sp-2); }
+.chip-weight .label { flex: 1; font-size: var(--fs-sm); }
+.chip-weight output { min-width: 4ch; text-align: center; font-variant-numeric: tabular-nums; font-weight: 650; }
+.chip-modal input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+.dict-modal { width: min(720px, calc(100vw - 24px)); height: min(820px, calc(100dvh - 24px)); }
+.dict-inner { height: 100%; }
+.dict-head { display: flex; align-items: center; gap: var(--sp-2); }
+.dict-head strong { font-size: var(--fs-lg); }
+.dict-head .icon-btn { margin-left: auto; font-size: 20px; }
+.dict-search { min-height: 44px; }
+.dict-target { margin-top: 0; }
+.dict-target button { flex: 1 0 auto; min-height: 34px; }
+.dict-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; color: var(--text-faint); font-size: var(--fs-sm); }
+.crumb { border: 0; background: none; color: var(--accent); cursor: pointer; padding: 2px 4px; font-size: var(--fs-sm); }
+.crumb:last-child { color: var(--text); font-weight: 650; }
+.dict-body { flex: 1; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: var(--sp-3); padding-right: 2px; }
+.dict-nodes { display: flex; flex-wrap: wrap; gap: 6px; }
+.dict-sub { margin: 0; font-weight: 600; }
+.dict-tags { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.dict-tag-btn {
+  width: 100%; display: grid; grid-template-columns: 26px 1fr auto; gap: 8px; align-items: start; text-align: left;
+  padding: 8px 10px; border-radius: var(--radius-xs); border: 1px solid var(--border-soft); background: var(--surface-2); cursor: pointer;
+}
+.dict-tag-btn:hover { border-color: var(--border); }
+.dict-tag.on .dict-tag-btn { border-color: var(--accent); background: var(--accent-soft); }
+.dict-tag.focus .dict-tag-btn { outline: 2px solid var(--accent); }
+.dict-check {
+  width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 700;
+  border: 1px solid var(--border); color: var(--text-dim);
+}
+.dict-tag.on .dict-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+.dict-tag-text { display: grid; gap: 2px; min-width: 0; }
+.dict-ko { font-size: var(--fs-sm); color: var(--text-dim); }
+.dict-desc { font-size: var(--fs-xs); color: var(--text-faint); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dict-where { font-size: var(--fs-xs); color: var(--accent); }
+.dict-count { font-size: var(--fs-xs); color: var(--text-faint); font-variant-numeric: tabular-nums; }

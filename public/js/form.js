@@ -183,6 +183,8 @@ export function createForm(catalog, { getControl }) {
     hiresToggle.checked = !!(s.hires && s.hires.enabled);
     hiresScale.value = h.scale; hiresSteps.value = h.steps; hiresDenoise.value = h.denoise;
     paintCount(); paintPresets(); paintLora(); paintSeed(); paintRanges(); paintHires();
+    // 프롬프트 칩처럼 입력칸 글자를 따라 그리는 화면들에 알린다
+    for (const box of [prompt, negative]) box.dispatchEvent(new Event("input"));
   }
   apply(saved);
 

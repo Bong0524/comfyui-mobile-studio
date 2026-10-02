@@ -75,6 +75,12 @@ sequenceDiagram
 - *고급 설정*: 샘플러·스케줄러(ComfyUI에서 목록을 받음), 선택형 Hires fix 2차 생성
 - 선택 기능 — ControlNet 포즈·참조 이미지: 이미지 업로드, 또는 내장 OpenPose 뼈대 에디터로 **포즈 직접 그리기**, 사진에서 포즈 추출
 
+**한/영 태그 사전** (원본 앱에서 옮김)
+- 자동완성: 영어 태그, 한국어 별칭(`긴 머리` → `long hair`), 초성(`ㄱㅁㄹ`)으로 찾고 ↑↓·Enter·Tab으로 넣기, 이미 있는 태그는 알려 줌
+- 프롬프트 칩: 프롬프트를 태그 단위 칩으로 보여 주고 한국어 이름을 함께 표시, 눌러서 강조(가중치) · 순서 · 삭제
+- 사전 탐색: 주체 › 외형 › 머리카락 같은 분류를 따라가거나 검색해서 프롬프트 · 네거티브에 넣기
+- 사전 데이터: 원본 앱의 한/영 사전에서 분류 · 한국어 별칭 · 설명이 **모두 갖춰진 일반 태그 10,100개** ([태그 사전 데이터](#태그-사전-데이터-tag-dictionary-data))
+
 **진행 상황 · 결과**
 - 서버 상태 표시: **온라인 / 오프라인 / 생성 중**
 - 실시간 진행률: 현재 단계, 스텝 수, 경과 시간, 대기 순서
@@ -205,6 +211,15 @@ npm start
    - *사진에서 포즈 추출*을 쓰려면 커스텀 노드 **comfyui_controlnet_aux**(`OpenposePreprocessor` 제공)를 설치하고 `CONTROLNET_PREPROCESSOR=openpose`로 설정합니다.
    - 포즈 그리기 에디터는 커스텀 노드가 필요 없습니다(뼈대 이미지를 그대로 사용).
 
+## 태그 사전 데이터 (Tag Dictionary Data)
+
+`public/data/tag-dict.json`은 원본 앱을 만들면서 직접 구축한 한/영 Danbooru 태그 사전(약 20만 항목)에서, 분류 경로 · 한국어 별칭 · 한국어 설명이 **모두 갖춰진 일반 태그**만 골라 담은 것입니다. 원본 사전은 이 저장소에 넣지 않았습니다.
+
+- 태그 10,100개, 분류 노드 745개(예: 외형 › 머리카락 › 머리 길이), 1.4MB(gzip 전송 약 0.55MB)
+- 용량을 줄이려고 객체 대신 배열로 저장합니다: `nodes` = [키, 부모, 한국어 이름, 영어 이름, 하위 태그 수], `tags` = [태그, 별칭들, 설명, 노드, 사용 횟수, 분류 코드]
+- 처음 쓸 때 한 번만 받아 브라우저에서 색인을 만들고 검색합니다(영어 접두어 · 단어 첫머리, 한국어 별칭, 초성, 설명).
+- `test/tag-dict.test.js`가 모든 항목의 완전성(별칭 · 설명 · 분류)과 검색 순위를 검사합니다.
+
 ## 원격 데모 (Remote Demo)
 
 목표: `https://<데모 도메인>` → Cloudflare Tunnel → `http://127.0.0.1:8080`(이 앱). ComfyUI는 `127.0.0.1:8188`에 그대로 두고 **공개하지 않습니다.**
@@ -263,7 +278,9 @@ comfyui-mobile-studio/
 ├─ public/                    웹 UI (HTML/CSS/ES 모듈)
 │  ├─ index.html
 │  ├─ css/tokens.css, app.css
+│  ├─ data/tag-dict.json      한/영 태그 사전 (분류 · 별칭 · 설명이 갖춰진 일반 태그)
 │  └─ js/ main · api · i18n(한/영) · status · form · generate · gallery · reference · pose-editor · ui
+│         tag-dict(검색·초성) · prompt-tokens · autocomplete · prompt-chips · dict-browser
 ├─ workflows/txt2img.api.json ComfyUI 워크플로우 템플릿 (기본 노드만)
 ├─ config/                    스타일 프리셋, 프롬프트 키워드, 모델 표시 이름 예시, 금지어 목록 예시
 ├─ start-demo.bat             Windows: ComfyUI + 앱 + 터널 + 브라우저를 한 번에
@@ -284,7 +301,7 @@ comfyui-mobile-studio/
 npm test          # Windows: test.bat
 ```
 
-테스트 27개: 워크플로우 역할 탐지(노드 번호를 바꾼 그래프 포함), 파라미터 주입, LoRA 재연결, ControlNet 삽입, 요청 검사, 세션 서명, 설정 안전장치, 그리고 가짜 ComfyUI를 상대로 한 통합 테스트(로그인, SSE 진행률, 실시간 미리보기, 이미지 중계, 갤러리, 업로드, 취소, 대기열 제한, 백엔드 오류, 백엔드 꺼짐).
+테스트 41개: 워크플로우 역할 탐지(노드 번호를 바꾼 그래프 포함), 파라미터 주입, LoRA 재연결, ControlNet 삽입, 요청 검사, 세션 서명, 설정 안전장치, 모델 공개 규칙, 태그 사전(완전성 · 검색 순위 · 초성), 프롬프트 토큰 처리, 그리고 가짜 ComfyUI를 상대로 한 통합 테스트(로그인, SSE 진행률, 실시간 미리보기, 이미지 중계, 갤러리, 업로드, 취소, 대기열 제한, 백엔드 오류, 백엔드 꺼짐).
 
 ## 앞으로 개선할 점 (Future Improvements)
 
@@ -298,7 +315,7 @@ npm test          # Windows: test.bat
 
 ## 변경 이력 (Changelog)
 
-버전별 변경 사항은 [CHANGELOG.md](CHANGELOG.md)에 있습니다. 최신 버전: **1.1.0** — 포트폴리오 전용 모델 폴더.
+버전별 변경 사항은 [CHANGELOG.md](CHANGELOG.md)에 있습니다. 최신 버전: **1.2.0** — 한/영 태그 사전(자동완성 · 프롬프트 칩 · 사전 탐색).
 
 ## 라이선스 (License)
 

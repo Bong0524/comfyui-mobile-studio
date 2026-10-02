@@ -75,6 +75,12 @@ Everything listed here is implemented in this repository.
 - *Advanced Settings*: sampler & scheduler (lists read from ComfyUI), optional hires-fix second pass
 - Optional pose / reference image via ControlNet: upload an image, or **draw a pose** in the built-in OpenPose skeleton editor; optional pose extraction from photos
 
+**Korean–English tag dictionary** (ported from the original app)
+- Autocomplete by English tag, Korean alias (`긴 머리` → `long hair`) or Korean initials (`ㄱㅁㄹ`); ↑↓ · Enter · Tab; warns about duplicates
+- Prompt chips: the prompt shown as tag chips with Korean names; tap to change emphasis (weight), order, or remove
+- Dictionary browser: walk categories such as Subject › Appearance › Hair or search, then add to the prompt or negative prompt
+- Dictionary data: **10,100 general tags** from the original app's Korean–English dictionary, each with a category, Korean aliases and a description ([Tag Dictionary Data](#tag-dictionary-data))
+
 **Monitoring & results**
 - Server status pill: **Online / Offline / Generating**
 - Live progress: current stage (node title), step counter, elapsed time, queue position
@@ -205,6 +211,15 @@ All settings live in `.env` (git-ignored); `.env.example` documents every key. T
    - For *extract the pose from a photo*, install the custom node pack **comfyui_controlnet_aux** (provides `OpenposePreprocessor`) and set `CONTROLNET_PREPROCESSOR=openpose`.
    - The drawn-pose editor needs no custom nodes (the skeleton image is used directly).
 
+## Tag Dictionary Data
+
+`public/data/tag-dict.json` holds the **general tags** of the Korean–English Danbooru tag dictionary I built for the original app (about 200k entries) that have all three of a category path, Korean aliases and a Korean description. The source dictionary itself is not part of this repository.
+
+- 10,100 tags, 745 category nodes (e.g. Appearance › Hair › Hair Length), 1.4 MB (about 0.55 MB gzipped on the wire)
+- Stored as arrays instead of objects to keep it small: `nodes` = [key, parent, Korean name, English name, tag count], `tags` = [tag, aliases, description, node, usage count, category code]
+- Fetched once on first use; the browser builds an index and searches it (English prefix / word start, Korean aliases, Korean initials, descriptions).
+- `test/tag-dict.test.js` checks every entry for completeness (aliases, description, category) and the search ranking.
+
 ## Remote Demo
 
 Goal: `https://<your-demo-domain>` → Cloudflare Tunnel → `http://127.0.0.1:8080` (this app). ComfyUI stays on `127.0.0.1:8188` and is **not** published.
@@ -262,10 +277,12 @@ comfyui-mobile-studio/
 ├─ public/                    Web UI (HTML/CSS/ES modules)
 │  ├─ index.html
 │  ├─ css/tokens.css, app.css
+│  ├─ data/tag-dict.json      Korean–English tag dictionary (general tags with category, aliases, description)
 │  └─ js/ main · api · i18n (ko/en) · status · form · generate · gallery · reference · pose-editor · ui
+│         tag-dict (search, initials) · prompt-tokens · autocomplete · prompt-chips · dict-browser
 ├─ workflows/txt2img.api.json ComfyUI workflow template (core nodes only)
 ├─ config/                    style presets, prompt tags, model display-name example, blocked-terms example
-├─ start-demo.bat            Windows: ComfyUI + app + tunnel + browser in one click
+├─ start-demo.bat             Windows: ComfyUI + app + tunnel + browser in one click
 ├─ start.bat · test.bat       Windows: app only / run tests
 ├─ models.bat                 Windows: check published models, edit display names
 ├─ scripts/                   mock ComfyUI, tunnel launcher, workflow checker, first-run setup,
@@ -283,7 +300,7 @@ comfyui-mobile-studio/
 npm test
 ```
 
-27 tests: workflow role detection (including a renumbered graph), parameter injection, LoRA rewiring, ControlNet insertion, request validation, session signing, config safety, and end-to-end runs against the mock ComfyUI (sign-in, SSE progress, live preview, image proxy, gallery, uploads, cancel, queue limit, backend error, backend offline).
+41 tests: workflow role detection (including a renumbered graph), parameter injection, LoRA rewiring, ControlNet insertion, request validation, session signing, config safety, model publishing rules, the tag dictionary (completeness, search ranking, Korean initials), prompt token handling, and end-to-end runs against the mock ComfyUI (sign-in, SSE progress, live preview, image proxy, gallery, uploads, cancel, queue limit, backend error, backend offline).
 
 ## Future Improvements
 
@@ -297,7 +314,7 @@ npm test
 
 ## Changelog
 
-See [CHANGELOG.en.md](CHANGELOG.en.md) for changes by version. Latest: **1.1.0** — dedicated portfolio model folder.
+See [CHANGELOG.en.md](CHANGELOG.en.md) for changes by version. Latest: **1.2.0** — Korean–English tag dictionary (autocomplete, prompt chips, dictionary browser).
 
 ## License
 

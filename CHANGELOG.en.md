@@ -4,6 +4,21 @@
 
 Notable changes to this project, by version. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-10-03
+
+Ports the Korean–English tag dictionary features of the original app.
+
+### Added
+- **Tag autocomplete** in the prompt and negative prompt fields — search by English tag, Korean alias (`긴 머리` → `long hair`) or Korean initials (`ㄱㅁㄹ`). ↑↓ to move, Enter / Tab to pick, Esc to close; keys are left alone while a Korean syllable is being composed. Duplicates are reported instead of inserted.
+- **Prompt chips** — the prompt shown as tag chips with Korean names. Tap a chip to change its emphasis (weight `(tag:1.2)`), move it, remove it or show it in the dictionary.
+- **Dictionary browser** — find tags through the category tree (e.g. Appearance › Hair › Hair Length) or search, and add/remove them in the prompt or negative prompt. Each category shows its most used tags first.
+- **Tag dictionary data** `public/data/tag-dict.json` — 10,100 general tags from the original app's Korean–English dictionary, each with a category, Korean aliases and a description; 745 category nodes.
+- Gzip for static files (dictionary 1.4 MB → about 0.55 MB).
+- New tests: dictionary completeness, search ranking / Korean initials, prompt token handling.
+
+### Changed
+- The prompt placeholder now mentions that Korean input works.
+
 ## [1.1.0] — 2026-10-02
 
 ### Added
@@ -41,5 +56,6 @@ First public (portfolio) release, built from a personal mobile ComfyUI client.
 - **i18n:** Korean UI by default with an English toggle; server messages follow the request language. Korean README / architecture docs by default, English versions alongside.
 - **Tooling:** dependency-free Node.js 22, mock ComfyUI for GPU-less development and tests, unit + integration tests, GitHub Actions CI.
 
+[1.2.0]: https://github.com/Bong0524/comfyui-mobile-studio/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Bong0524/comfyui-mobile-studio/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Bong0524/comfyui-mobile-studio/releases/tag/v1.0.0

@@ -16,7 +16,7 @@ deploy/cloudflared/*.json
 deploy/cloudflared/config.yml
 
 # ── 실행 중 생기는 데이터 (갤러리 기록, 생성·업로드 이미지) ──
-data/
+/data/
 output/
 outputs/
 uploads/

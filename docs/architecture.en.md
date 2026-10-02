@@ -58,6 +58,7 @@ flowchart TB
 | `server/comfy/client.js` | Thin wrapper over the ComfyUI endpoints actually used. |
 | `server/comfy/monitor.js` | One persistent WebSocket to ComfyUI, reconnecting with exponential backoff. |
 | `server/history-store.js` | Recent results (metadata only), written atomically. |
+| `public/js/tag-dict.js` & co. | Fetches the static tag dictionary once on first use and searches it in the browser (English, Korean aliases, Korean initials). Autocomplete, prompt chips and the dictionary browser share one index. The server only serves the file (gzipped); the dictionary plays no part in request validation. |
 | `server/uploads.js` | Reference-image uploads: magic-byte type check, random names, forwarded to ComfyUI's input folder. |
 | `public/js/*` | UI modules: `api` (fetch + timeout + response checks), `i18n` (Korean default / English), `status`, `form`, `generate` (SSE + polling fallback), `gallery`, `reference`, `pose-editor`. |
 

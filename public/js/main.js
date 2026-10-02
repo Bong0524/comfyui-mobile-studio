@@ -9,6 +9,9 @@ import { createForm } from "./form.js";
 import { createReference } from "./reference.js";
 import { createGenerator } from "./generate.js";
 import { createGallery } from "./gallery.js";
+import { attachAutocomplete } from "./autocomplete.js";
+import { attachChips } from "./prompt-chips.js";
+import { createDictBrowser } from "./dict-browser.js";
 
 applyStatic();   // HTML 기본 문구(한국어)를 저장된 언어로 맞춘다
 const status = createStatusMonitor();
@@ -91,6 +94,20 @@ async function startApp() {
 
   const reference = createReference(catalog);
   const form = createForm(catalog, { getControl: () => reference.get() });
+
+  // 태그 사전: 자동완성 · 프롬프트 칩 · 사전 탐색 (사전 데이터는 처음 쓸 때 받는다)
+  const promptInput = $("promptInput"), negativeInput = $("negativeInput");
+  const dict = createDictBrowser({
+    targets: [
+      { label: t("dict.toPrompt"), textarea: promptInput },
+      { label: t("dict.toNegative"), textarea: negativeInput },
+    ],
+  });
+  attachAutocomplete(promptInput);
+  attachAutocomplete(negativeInput);
+  attachChips(promptInput, $("promptChips"), { openDict: dict.open });
+  attachChips(negativeInput, $("negativeChips"), { openDict: dict.open });
+  $("dictBtn").addEventListener("click", () => dict.open({ target: promptInput }));
   const gallery = createGallery({
     presetLabel: (id) => pick((catalog.stylePresets.find((p) => p.id === id) || { label: id }).label),
     onReuse: (req) => { form.applyRequest(req); selectTab("create"); toast(t("viewer.reused")); },

@@ -59,16 +59,21 @@
         <div class="card">
           <div class="card-head">
             <label for="promptInput" data-i18n="prompt.label">프롬프트</label>
-            <span class="counter" id="promptCount">0</span>
+            <span class="card-head-side">
+              <span class="counter" id="promptCount">0</span>
+              <button class="btn ghost small" type="button" id="dictBtn" data-i18n-title="dict.openTitle" title="태그 사전에서 찾아 넣기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg> <span data-i18n="dict.open">사전</span></button>
+            </span>
           </div>
-          <textarea id="promptInput" rows="4" data-i18n-placeholder="prompt.placeholder" placeholder="만들고 싶은 이미지를 영어로 적어 주세요 — 예: a lighthouse on a cliff at dusk, crashing waves" spellcheck="false"></textarea>
+          <textarea id="promptInput" rows="4" data-i18n-placeholder="prompt.placeholder" placeholder="만들고 싶은 이미지를 적어 주세요. 한국어로 치면 영어 태그로 바꿔 줍니다 — 예: 벚꽃, 긴 머리, 웃음" spellcheck="false"></textarea>
+          <div class="prompt-chips" id="promptChips" hidden></div>
           <details class="helper">
             <summary data-i18n="prompt.helper">프롬프트 도우미 (눌러서 추가)</summary>
             <div id="tagGroups" class="tag-groups"></div>
           </details>
           <details class="helper">
             <summary data-i18n="negative.label">네거티브 프롬프트</summary>
-            <textarea id="negativeInput" rows="2" data-i18n-placeholder="negative.placeholder" placeholder="빼고 싶은 요소 (영어)" spellcheck="false"></textarea>
+            <textarea id="negativeInput" rows="2" data-i18n-placeholder="negative.placeholder" placeholder="빼고 싶은 요소 — 한국어로 쳐도 태그로 바꿔 줍니다" spellcheck="false"></textarea>
+            <div class="prompt-chips" id="negativeChips" hidden></div>
           </details>
         </div>
 
