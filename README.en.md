@@ -314,7 +314,7 @@ npm test
 
 ## Changelog
 
-See [CHANGELOG.en.md](CHANGELOG.en.md) for changes by version. Latest: **1.2.0** — Korean–English tag dictionary (autocomplete, prompt chips, dictionary browser).
+See [CHANGELOG.en.md](CHANGELOG.en.md) for changes by version. Latest: **1.2.1** — tag dictionary translation quality.
 
 ## License
 

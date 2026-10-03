@@ -4,6 +4,16 @@
 
 Notable changes to this project, by version. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] — 2026-10-03
+
+### Changed
+- **Tag dictionary translation quality** — Korean aliases and descriptions refined for about 5,000 entries (5,029 alias lists, 286 descriptions).
+  - The primary name (shown on chips and in autocomplete) is now the most natural Korean term (e.g. `smile` → 미소, `sidelocks` → 옆머리)
+  - Mistranslated or garbled aliases (mixed scripts, broken transliterations) corrected (e.g. `arms_behind_back` → 뒷짐)
+  - Aliases far broader than the tag removed (e.g. "고양이" (cat) on `cat_ears`, "분홍색" (pink) on `pink_hair`)
+  - Descriptions that did not match their tag rewritten
+- Alias order tidied so more precise tags rank first in search.
+
 ## [1.2.0] — 2026-10-03
 
 Ports the Korean–English tag dictionary features of the original app.
@@ -56,6 +66,7 @@ First public (portfolio) release, built from a personal mobile ComfyUI client.
 - **i18n:** Korean UI by default with an English toggle; server messages follow the request language. Korean README / architecture docs by default, English versions alongside.
 - **Tooling:** dependency-free Node.js 22, mock ComfyUI for GPU-less development and tests, unit + integration tests, GitHub Actions CI.
 
+[1.2.1]: https://github.com/Bong0524/comfyui-mobile-studio/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/Bong0524/comfyui-mobile-studio/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Bong0524/comfyui-mobile-studio/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Bong0524/comfyui-mobile-studio/releases/tag/v1.0.0

@@ -4,6 +4,16 @@
 
 이 프로젝트의 주요 변경 사항을 버전별로 적습니다. 버전 번호는 [유의적 버전](https://semver.org/lang/ko/)을 따릅니다.
 
+## [1.2.1] — 2026-10-03
+
+### 변경
+- **태그 사전 번역 품질 개선** — 5,000여 개 항목의 한국어 별칭과 설명을 다듬었습니다(별칭 5,029개 · 설명 286개).
+  - 대표 이름(칩과 자동완성에 보이는 이름)을 가장 자연스러운 한국어로 바꿈 (예: `smile` → 미소, `sidelocks` → 옆머리)
+  - 잘못 옮겨졌거나 다른 문자가 섞여 깨진 별칭을 바로잡음 (예: `arms_behind_back` → 뒷짐, 팔을 등 뒤로)
+  - 태그보다 지나치게 넓은 별칭을 정리 (예: `cat_ears` 의 "고양이", `pink_hair` 의 "분홍색")
+  - 내용이 어긋난 설명을 고침
+- 검색 결과에서 더 정확한 태그가 앞에 오도록 별칭 순서를 정리했습니다.
+
 ## [1.2.0] — 2026-10-03
 
 원본 앱의 한/영 태그 사전 기능을 옮겼습니다.
@@ -56,6 +66,7 @@
 - **다국어:** 화면 한국어 기본 + 영어 전환, 서버 메시지도 요청 언어에 맞춤. README · 구조 문서 한국어 기본 + 영어 버전.
 - **개발 도구:** 의존성 없는 Node.js 22, 가짜 ComfyUI(GPU 없이 개발 · 테스트), 단위 + 통합 테스트, GitHub Actions CI.
 
+[1.2.1]: https://github.com/Bong0524/comfyui-mobile-studio/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/Bong0524/comfyui-mobile-studio/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Bong0524/comfyui-mobile-studio/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Bong0524/comfyui-mobile-studio/releases/tag/v1.0.0

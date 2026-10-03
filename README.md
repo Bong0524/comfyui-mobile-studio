@@ -315,7 +315,7 @@ npm test          # Windows: test.bat
 
 ## 변경 이력 (Changelog)
 
-버전별 변경 사항은 [CHANGELOG.md](CHANGELOG.md)에 있습니다. 최신 버전: **1.2.0** — 한/영 태그 사전(자동완성 · 프롬프트 칩 · 사전 탐색).
+버전별 변경 사항은 [CHANGELOG.md](CHANGELOG.md)에 있습니다. 최신 버전: **1.2.1** — 태그 사전 번역 품질 개선.
 
 ## 라이선스 (License)
 
